@@ -18,7 +18,8 @@ const SessionContext = createContext<SessionValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [dataReady, setDataReady] = useState(false);
+  // Voor welke gebruiker de profieldata geladen is
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const [me, setMe] = useState<Profile | null>(null);
   const [partner, setPartner] = useState<Profile | null>(null);
   const [coupleId, setCoupleId] = useState<string | null>(null);
@@ -35,31 +36,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const userId = session?.user.id ?? null;
 
   const refresh = useCallback(async () => {
-    if (!userId) {
-      setMe(null);
-      setPartner(null);
-      setCoupleId(null);
-      setDataReady(true);
-      return;
-    }
+    if (!userId) return;
     try {
       const [profiles, members] = await Promise.all([fetchProfiles(), fetchCoupleMembers()]);
       setMe(profiles.find((p) => p.id === userId) ?? null);
       setPartner(profiles.find((p) => p.id !== userId) ?? null);
       setCoupleId(members[0]?.couple_id ?? null);
     } finally {
-      setDataReady(true);
+      setLoadedFor(userId);
     }
   }, [userId]);
 
   useEffect(() => {
-    setDataReady(false);
     refresh().catch(() => {});
   }, [refresh]);
 
+  // Uitgelogd, of gegevens nog van een vorige gebruiker: niets tonen
+  const current = userId !== null && loadedFor === userId;
+
   return (
     <SessionContext.Provider
-      value={{ loading: !authReady || !dataReady, session, me, partner, coupleId, refresh }}
+      value={{
+        loading: !authReady || (userId !== null && loadedFor !== userId),
+        session,
+        me: current ? me : null,
+        partner: current ? partner : null,
+        coupleId: current ? coupleId : null,
+        refresh,
+      }}
     >
       {children}
     </SessionContext.Provider>

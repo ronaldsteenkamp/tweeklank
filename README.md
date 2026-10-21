@@ -4,8 +4,6 @@ Een **volledig gratis** relatie-app voor koppels. Er is geen abonnement, geen pr
 
 Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het antwoord van je partner zie je pas als je zelf hebt geantwoord.
 
-> Werktitel *Tweeklank*. Alternatieve namen: *Wijzer*, *Nestje*.
-
 ## Status
 
 | Fase | Inhoud | Status |
@@ -17,7 +15,19 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ✅ |
 | 5 | Oefeningen & tips | ✅ |
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ✅ |
-| 7 | Afronding: toegankelijkheid, privacy, store-builds | ⏳ |
+| 7 | Afronding: toegankelijkheid, lint, privacy, store-voorbereiding | ✅ |
+
+## Startcontent
+
+Alles is zelf geschreven, in het Nederlands.
+
+| Onderdeel | Aantal |
+|---|---|
+| Dagelijkse vragen | 60 |
+| Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
+| Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
+| Oefeningen | 12 |
+| Date-ideeën | 42 |
 
 ## Techniek
 
@@ -31,7 +41,7 @@ src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
-supabase/tests      pgTAP-tests (koppelen, zichtbaarheid, streaks)
+supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, streaks, meldingen, quiz, kaarten, oefeningen, samen)
 supabase/functions  Edge Functions (delete-account, send-push)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
@@ -116,10 +126,11 @@ npx expo start
 ## Tests
 
 ```bash
-npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA), meldingen
+npm test                # Jest: datum/tijdzone, codes, kleurcontrast (WCAG AA), meldingen, quiz, kaarten, plannen
 npm run typecheck       # TypeScript
+npm run lint            # ESLint (eslint-config-expo)
 npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
-npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen, kaarten, oefeningen (lokale PostgreSQL + pgTAP, geen Docker nodig)
+npm run test:db         # pgTAP: alle RLS-regels en databaselogica (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
 Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.
@@ -136,6 +147,32 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
 
+## Toegankelijkheid
+
+- **Contrast:** alle tekstkleuren halen WCAG AA (≥ 4,5:1) in het lichte en het donkere thema. `__tests__/contrast.test.ts` controleert dat automatisch.
+- **Grote tekst:** tekst schaalt mee met de systeeminstelling, tot 2× groot. Containers hebben geen vaste hoogte.
+- **Schermlezers:** elk aanklikbaar element heeft een rol en een label (VoiceOver/TalkBack). Lang-indrukacties, zoals een reactie verwijderen, zijn ook als schermlezer-actie beschikbaar.
+- **Raakvlakken:** knoppen zijn minimaal 44 punten hoog.
+
+## Naar de App Store en Play Store
+
+De app gebruikt alleen gratis diensten: Supabase free tier, Expo/EAS free tier en Expo Push.
+
+1. **Eigen identiteit.**
+   - Pas `ios.bundleIdentifier` en `android.package` in `app.json` aan. Nu staat er `nl.tweeklank.app`. Kies een domein dat je bezit of een unieke naam.
+   - Vervang de standaard-Expo-iconen in `assets/` door een eigen icoon en splash-afbeelding.
+2. **Koppelen aan EAS:** `npx eas-cli login` en `npx eas-cli init`.
+3. **Productiebuild:**
+   ```bash
+   npx eas-cli build --profile production --platform all
+   ```
+4. **Indienen:** `npx eas-cli submit --platform ios` en `--platform android`. Hiervoor heb je een Apple Developer-account (€99 per jaar) en een Google Play-ontwikkelaarsaccount (eenmalig $25) nodig. De app zelf blijft gratis.
+5. **Store-gegevens.**
+   - **Leeftijdsclassificatie:** door de optionele 18+-kaarten is 17+ (App Store) of *Mature/18+* (Play Store) het verstandigst. Vermeld dat de 18+-content standaard uit staat.
+   - **Privacylabels:** er is geen tracking. De app verzamelt wel een e-mailadres (account) en door de gebruiker gemaakte content (antwoorden, plannen), uitsluitend voor de werking van de app en niet gekoppeld aan advertenties.
+   - **Account verwijderen in de app:** dat is verplicht voor beide stores en zit al in de app, onder *Ik → Account verwijderen*.
+6. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Gebruik de tekst uit `src/app/privacy.tsx` als basis en publiceer die bijvoorbeeld via GitHub Pages.
+
 ## Content uitbreiden
 
 Voeg een nieuwe migratie toe, bijvoorbeeld `supabase/migrations/20270101000000_meer_vragen.sql`:
@@ -147,3 +184,5 @@ on conflict (slug) do nothing;
 ```
 
 Draai daarna `npx supabase db push` en `npm run check:content`.
+
+Het werkt hetzelfde voor quizzen (`quizzes`, `quiz_questions`), kaarten (`themes`, `theme_questions`), oefeningen (`exercises`) en date-ideeën (`date_ideas`). Kijk naar de bestaande `…_content_….sql`-migraties als voorbeeld.

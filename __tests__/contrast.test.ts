@@ -25,3 +25,20 @@ describe.each([
     expect(contrastRatio(theme[fg], theme[bg])).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+describe('contrast vaste combinaties', () => {
+  it('Pill: donkere tekst op honing (accent) in beide thema\'s', () => {
+    expect(contrastRatio('#2B2320', light.accent)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio('#2B2320', dark.accent)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each([
+    ['licht', light],
+    ['donker', dark],
+  ] as const)('%s: actieve keuzeknop en afgevinkte tekst', (_n, t) => {
+    expect(contrastRatio(t.onPrimary, t.primary)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(t.textMuted, t.surface)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(t.secondary, t.surfaceAlt)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(t.primary, t.surfaceAlt)).toBeGreaterThanOrEqual(4.5);
+  });
+});

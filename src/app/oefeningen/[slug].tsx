@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { AppText, Button, Card, ErrorText, Field, Loading, Screen } from '@/components/ui';
 import { addCompletion, fetchCompletions, fetchExercise, removeCompletion } from '@/lib/api';
@@ -30,9 +30,11 @@ export default function OefeningDetail() {
     }
   }, [slug]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
 
   if (exercise === undefined && !error) return <Loading />;
   if (!exercise) return <Screen><ErrorText message={error ?? 'Deze oefening bestaat niet.'} /></Screen>;
@@ -103,6 +105,9 @@ export default function OefeningDetail() {
               <Pressable
                 key={c.id}
                 onLongPress={own ? () => confirmRemove(c) : undefined}
+                accessibilityRole={own ? 'button' : 'text'}
+                accessibilityActions={own ? [{ name: 'longpress', label: 'Weghalen' }] : undefined}
+                onAccessibilityAction={own ? () => confirmRemove(c) : undefined}
                 accessibilityLabel={`${who(c.user_id)}, ${formatDayNl(day)}${c.note ? `: ${c.note}` : ''}`}
                 accessibilityHint={own ? 'Lang indrukken om weg te halen' : undefined}
               >

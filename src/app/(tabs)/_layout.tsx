@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Notifications from 'expo-notifications';
 import { Redirect, router } from 'expo-router';
 import { useEffect } from 'react';
-import Tabs from 'expo-router/js-tabs';
+import { Tabs } from 'expo-router/js-tabs';
 import { Loading } from '@/components/ui';
 import { registerForPush } from '@/lib/push';
 import { useSession } from '@/lib/session';

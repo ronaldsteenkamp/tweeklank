@@ -5,7 +5,9 @@ import { supabase } from './supabase';
 // het antwoord van je partner ontvang je pas als je het ook mag zien.
 export function useCoupleRealtime(coupleId: string | null, onChange: () => void) {
   const cb = useRef(onChange);
-  cb.current = onChange;
+  useEffect(() => {
+    cb.current = onChange;
+  });
 
   useEffect(() => {
     if (!coupleId) return;

@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { AnswerThread } from '@/components/AnswerThread';
 import { AppText, Card, DEPTH_LABEL, ErrorText, Loading, Screen } from '@/components/ui';
 import { fetchAnswers, fetchArchiveDay } from '@/lib/api';
@@ -28,9 +28,11 @@ export default function Dag() {
     }
   }, [day]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
   useCoupleRealtime(coupleId, load);
 
   if (error) return <Screen><ErrorText message={error} /></Screen>;

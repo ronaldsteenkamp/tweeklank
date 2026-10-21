@@ -8,7 +8,6 @@ import { minutesLabel } from '@/lib/exercises';
 import { useSession } from '@/lib/session';
 import { BUDGET_LABEL, BUDGETS, filterIdeas, type Budget, type DateIdea, type Setting } from '@/lib/together';
 import { useTheme } from '@/theme/ThemeProvider';
-import { spacing } from '@/theme/tokens';
 
 export default function Ideeen() {
   const { colors } = useTheme();

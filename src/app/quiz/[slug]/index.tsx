@@ -1,5 +1,5 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { AppText, Button, Card, ErrorText, Loading, Screen } from '@/components/ui';
 import { fetchMyQuizResponses, fetchQuiz, fetchQuizOverview, saveQuizResponse, type QuizDetail } from '@/lib/api';
@@ -41,9 +41,11 @@ export default function QuizInvullen() {
     }
   }, [slug, me]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
 
   const questionIds = useMemo(() => quiz?.quiz_questions.map((q) => q.id) ?? [], [quiz]);
 

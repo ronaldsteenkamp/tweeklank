@@ -111,6 +111,9 @@ function AnswerCard({
               <Pressable
                 key={r.id}
                 onLongPress={own ? () => confirmRemove(r.id) : undefined}
+                accessibilityRole={own ? 'button' : 'text'}
+                accessibilityActions={own ? [{ name: 'longpress', label: 'Verwijderen' }] : undefined}
+                onAccessibilityAction={own ? () => confirmRemove(r.id) : undefined}
                 accessibilityLabel={`${who} reageerde: ${r.emoji ? labelFor(r.emoji) : ''} ${r.message ?? ''}`}
                 accessibilityHint={own ? 'Lang indrukken om te verwijderen' : undefined}
                 style={{
