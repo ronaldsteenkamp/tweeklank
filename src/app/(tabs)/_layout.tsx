@@ -11,7 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 export default function TabsLayout() {
   const { colors } = useTheme();
   const { loading, session, me, partner } = useSession();
-  const wantsPush = !!me && (me.notify_new_question || me.notify_partner_answered);
+  const wantsPush = !!me && (me.notify_new_question || me.notify_partner_answered || me.notify_dates);
 
   // Token stil vernieuwen (zonder om toestemming te vragen) als meldingen aan staan.
   useEffect(() => {
@@ -23,6 +23,7 @@ export default function TabsLayout() {
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
       const url = response.notification.request.content.data?.url;
       if (url === '/vandaag') router.navigate('/vandaag');
+      else if (url === '/datums') router.navigate('/datums');
     });
     return () => sub.remove();
   }, []);

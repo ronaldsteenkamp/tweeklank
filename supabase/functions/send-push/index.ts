@@ -2,13 +2,15 @@
 //
 // Aanroepen (alleen met de geheime header x-tweeklank-secret = PUSH_WEBHOOK_SECRET):
 //   * Database Webhook op INSERT in daily_answers  → body { type: 'INSERT', record: { id } }
-//   * pg_cron om 07:00 en 08:00 UTC                 → body { type: 'daily' }  (verstuurt alleen als het 9 uur is in Amsterdam)
+//   * pg_cron om 07:00 en 08:00 UTC                 → body { type: 'daily' }  (dagvraag + datumherinneringen,
+//                                                     alleen als het 9 uur is in Amsterdam)
 //
 // Deploy: npx supabase functions deploy send-push --no-verify-jwt
 //         npx supabase secrets set PUSH_WEBHOOK_SECRET=<lange willekeurige tekst>
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import {
   chunk,
+  dateReminderMessages,
   EXPO_PUSH_URL,
   invalidTokens,
   isAmsterdamHour,
@@ -54,7 +56,12 @@ Deno.serve(async (req) => {
     if (!payload.force && !isAmsterdamHour(new Date(), 9)) return json({ skipped: 'niet 9 uur in Amsterdam' });
     const { data, error } = await admin.rpc('push_targets_new_question');
     if (error) return json({ error: error.message }, 500);
-    messages = newQuestionMessages((data ?? []).map((r: { token: string }) => r.token));
+    const reminders = await admin.rpc('push_targets_date_reminders');
+    if (reminders.error) return json({ error: reminders.error.message }, 500);
+    messages = [
+      ...newQuestionMessages((data ?? []).map((r: { token: string }) => r.token)),
+      ...dateReminderMessages(reminders.data ?? []),
+    ];
   } else {
     return json({ error: 'onbekend type' }, 400);
   }

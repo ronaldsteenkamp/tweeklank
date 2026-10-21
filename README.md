@@ -16,7 +16,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ✅ |
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ✅ |
 | 5 | Oefeningen & tips | ✅ |
-| 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ⏳ |
+| 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ✅ |
 | 7 | Afronding: toegankelijkheid, privacy, store-builds | ⏳ |
 
 ## Techniek
@@ -69,7 +69,7 @@ __tests__/          Jest-tests voor app-logica
       ```
    3. Open `supabase/sql/cron-en-webhook.sql`. Vul daar je project-URL en **dezelfde** geheime tekst in en draai het bestand eenmalig in de *SQL Editor*. Het zet drie dingen klaar:
       - een trigger voor *"partner heeft geantwoord"*;
-      - twee cron-jobs voor *"de vraag van vandaag staat klaar"*, om 9:00 Nederlandse tijd;
+      - twee cron-jobs die om 9:00 Nederlandse tijd *"de vraag van vandaag staat klaar"* en de herinneringen aan belangrijke datums versturen;
       - de geheimen in Vault.
    4. Koppel de app aan een (gratis) Expo-account met `npx eas-cli init`. Dat zet de `projectId` in `app.json`, en die is nodig voor pushtokens.
 7. **Mailserver (voor echt gebruik).** De ingebouwde mailserver van Supabase verstuurt maar een paar mails per uur. Dat is genoeg om te testen. Voor echte gebruikers stel je een eigen SMTP-server in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
@@ -99,6 +99,11 @@ npx expo start
 - Filter op diepgang (luchtig, persoonlijk of diep) en swipe door de kaarten, of gebruik Vorige/Volgende.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
+
+**Samen plannen testen.**
+- Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
+- Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
+- Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
 
 **Pushmeldingen testen.**
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.

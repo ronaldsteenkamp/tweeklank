@@ -240,4 +240,30 @@ export function Row({ children, gap = spacing.sm, wrap }: { children: ReactNode;
   return <View style={{ flexDirection: 'row', alignItems: 'center', gap, flexWrap: wrap ? 'wrap' : 'nowrap' }}>{children}</View>;
 }
 
+/** Keuzeknop voor filters (radio-gedrag). */
+export function Chip({ label, active, onPress, accessibilityLabel }: { label: string; active: boolean; onPress: () => void; accessibilityLabel?: string }) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: active }}
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={{
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: spacing.md,
+        borderRadius: radius.pill,
+        borderWidth: 1.5,
+        borderColor: active ? colors.primary : colors.border,
+        backgroundColor: active ? colors.primary : 'transparent',
+      }}
+    >
+      <AppText variant="label" color={active ? colors.onPrimary : colors.text}>
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
 export const DEPTH_LABEL: Record<number, string> = { 1: 'Luchtig', 2: 'Persoonlijk', 3: 'Diep' };

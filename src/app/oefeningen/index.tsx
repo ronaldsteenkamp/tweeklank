@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { AppText, ErrorText, Pill, Row, Screen } from '@/components/ui';
+import { AppText, Chip, ErrorText, Pill, Row, Screen } from '@/components/ui';
 import { fetchCompletions, fetchExercises } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
 import {
@@ -49,28 +49,7 @@ export default function Oefeningen() {
         {CATEGORIES.map((c) => {
           const active = category === c;
           const label = c ? CATEGORY_LABEL[c] : 'Alles';
-          return (
-            <Pressable
-              key={label}
-              onPress={() => setCategory(c)}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: active }}
-              accessibilityLabel={`Categorie: ${label}`}
-              style={{
-                minHeight: 44,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.md,
-                borderRadius: radius.pill,
-                borderWidth: 1.5,
-                borderColor: active ? colors.primary : colors.border,
-                backgroundColor: active ? colors.primary : 'transparent',
-              }}
-            >
-              <AppText variant="label" color={active ? colors.onPrimary : colors.text}>
-                {label}
-              </AppText>
-            </Pressable>
-          );
+          return <Chip key={label} label={label} active={active} onPress={() => setCategory(c)} accessibilityLabel={`Categorie: ${label}`} />;
         })}
       </Row>
       <ErrorText message={error} />

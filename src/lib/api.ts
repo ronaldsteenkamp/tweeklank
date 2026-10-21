@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
+import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
@@ -299,4 +300,68 @@ export async function addCompletion(params: { coupleId: string; userId: string; 
 
 export async function removeCompletion(id: number): Promise<void> {
   unwrap(await supabase.from('exercise_completions').delete().eq('id', id));
+}
+
+// ---- Samen plannen ----
+
+export async function fetchDateIdeas(): Promise<DateIdea[]> {
+  return unwrap(await supabase.from('date_ideas').select('*').order('position')) as DateIdea[];
+}
+
+const PLAN_FIELDS = 'id, title, notes, planned_for, done, created_at, created_by';
+
+export async function fetchPlans(): Promise<Plan[]> {
+  return unwrap(await supabase.from('plans').select(PLAN_FIELDS)) as Plan[];
+}
+
+export async function addPlan(params: {
+  coupleId: string;
+  userId: string;
+  title: string;
+  plannedFor?: string | null;
+  dateIdeaId?: number;
+}): Promise<void> {
+  unwrap(
+    await supabase.from('plans').insert({
+      couple_id: params.coupleId,
+      created_by: params.userId,
+      title: params.title.trim(),
+      planned_for: params.plannedFor ?? null,
+      date_idea_id: params.dateIdeaId ?? null,
+    }),
+  );
+}
+
+export async function updatePlan(id: number, patch: Partial<Pick<Plan, 'title' | 'notes' | 'planned_for' | 'done'>>): Promise<void> {
+  unwrap(await supabase.from('plans').update(patch).eq('id', id));
+}
+
+export async function deletePlan(id: number): Promise<void> {
+  unwrap(await supabase.from('plans').delete().eq('id', id));
+}
+
+const DATE_FIELDS = 'id, title, kind, date, yearly, remind_days_before, created_by';
+
+export async function fetchImportantDates(): Promise<ImportantDate[]> {
+  return unwrap(await supabase.from('important_dates').select(DATE_FIELDS)) as ImportantDate[];
+}
+
+export type ImportantDateInput = Pick<ImportantDate, 'title' | 'kind' | 'date' | 'yearly' | 'remind_days_before'>;
+
+export async function saveImportantDate(params: {
+  coupleId: string;
+  userId: string;
+  id?: number;
+  value: ImportantDateInput;
+}): Promise<void> {
+  const value = { ...params.value, title: params.value.title.trim() };
+  if (params.id) {
+    unwrap(await supabase.from('important_dates').update(value).eq('id', params.id));
+  } else {
+    unwrap(await supabase.from('important_dates').insert({ ...value, couple_id: params.coupleId, created_by: params.userId }));
+  }
+}
+
+export async function deleteImportantDate(id: number): Promise<void> {
+  unwrap(await supabase.from('important_dates').delete().eq('id', id));
 }

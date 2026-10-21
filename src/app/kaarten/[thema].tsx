@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, Switch, useWindowDimensions, View } from 'react-native';
-import { AppText, Button, DEPTH_LABEL, ErrorText, Loading, Row, Screen } from '@/components/ui';
+import { AppText, Button, Chip, DEPTH_LABEL, ErrorText, Loading, Row, Screen } from '@/components/ui';
 import { fetchCardMarks, fetchTheme, setCardMark, type ThemeDetail } from '@/lib/api';
 import {
   clampIndex,
@@ -85,28 +85,8 @@ export default function ThemaKaarten() {
         <Row wrap>
           {DEPTHS.map((d) => {
             const active = filter.depth === d;
-            return (
-              <Pressable
-                key={d}
-                onPress={() => changeFilter({ depth: d })}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: active }}
-                accessibilityLabel={`Diepgang: ${d === 0 ? 'alles' : DEPTH_LABEL[d]}`}
-                style={{
-                  minHeight: 44,
-                  justifyContent: 'center',
-                  paddingHorizontal: spacing.md,
-                  borderRadius: radius.pill,
-                  borderWidth: 1.5,
-                  borderColor: active ? colors.primary : colors.border,
-                  backgroundColor: active ? colors.primary : 'transparent',
-                }}
-              >
-                <AppText variant="label" color={active ? colors.onPrimary : colors.text}>
-                  {d === 0 ? 'Alles' : DEPTH_LABEL[d]}
-                </AppText>
-              </Pressable>
-            );
+            const label = d === 0 ? 'Alles' : DEPTH_LABEL[d];
+            return <Chip key={d} label={label} active={active} onPress={() => changeFilter({ depth: d })} accessibilityLabel={`Diepgang: ${label}`} />;
           })}
         </Row>
         <FilterSwitch label="Verberg besproken" value={filter.hideDiscussed} onChange={(v) => changeFilter({ hideDiscussed: v })} />

@@ -19,6 +19,7 @@ const expectations = [
   ['dagelijkse vragen', count('dv-'), 60],
   ['quizzen', quizSlugs.length, 5],
   ['oefeningen', count('ex-'), 12],
+  ['date-ideeën', count('di-'), 40],
   ...quizSlugs.map((q) => [`  vragen in ${q}`, quizQuestionsPer(q), 10]),
 ];
 

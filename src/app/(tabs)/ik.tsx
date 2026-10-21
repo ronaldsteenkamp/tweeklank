@@ -28,13 +28,13 @@ export default function Ik() {
 
   const partnerName = partner?.display_name || 'je partner';
 
-  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered', value: boolean) =>
+  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates', value: boolean) =>
     run(key, async () => {
       if (!session || !me) return;
       setPushInfo(null);
       await updateProfile(session.user.id, { [key]: value });
-      const anyOn = (key === 'notify_new_question' ? value : me.notify_new_question) ||
-        (key === 'notify_partner_answered' ? value : me.notify_partner_answered);
+      const next = { ...me, [key]: value };
+      const anyOn = next.notify_new_question || next.notify_partner_answered || next.notify_dates;
       if (anyOn) {
         const result = await registerForPush();
         if (!result.ok) setPushInfo(result.message);
@@ -218,6 +218,13 @@ export default function Ik() {
           value={!!me?.notify_partner_answered}
           disabled={busy !== null}
           onChange={(v) => toggleNotify('notify_partner_answered', v)}
+        />
+        <NotifySwitch
+          label="Herinneringen aan belangrijke datums"
+          hint="Zoals ingesteld per datum onder Samen"
+          value={!!me?.notify_dates}
+          disabled={busy !== null}
+          onChange={(v) => toggleNotify('notify_dates', v)}
         />
         {pushInfo ? (
           <AppText variant="small" muted accessibilityLiveRegion="polite">

@@ -57,3 +57,14 @@ export function isAmsterdamHour(at: Date, hour: number): boolean {
   const h = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).format(at);
   return Number(h) === hour;
 }
+
+/** Herinnering aan een belangrijke datum, bijv. "Over 7 dagen: Jubileum". */
+export function dateReminderMessages(rows: { token: string; title: string; days_until: number }[]): PushMessage[] {
+  return rows
+    .filter((r) => isExpoPushToken(r.token))
+    .map((r) => {
+      const when = r.days_until === 0 ? 'Vandaag' : r.days_until === 1 ? 'Morgen' : `Over ${r.days_until} dagen`;
+      const body = r.days_until === 0 ? 'Maak er samen iets moois van.' : 'Tijd om er iets leuks voor te bedenken?';
+      return message(r.token, `${when}: ${r.title}`, body, '/datums');
+    });
+}
