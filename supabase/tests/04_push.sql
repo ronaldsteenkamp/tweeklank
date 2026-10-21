@@ -1,6 +1,6 @@
 -- Tests: pushtokens en wie welke melding krijgt
 begin;
-select plan(12);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'a@test.nl'),
@@ -39,6 +39,7 @@ select throws_ok($$ insert into public.push_tokens (token, user_id, platform) va
   '42501', null, 'tokens direct invoegen kan niet (alleen via register_push_token)');
 select throws_ok($$ select * from public.push_targets_new_question() $$, '42501', null, 'clients kunnen ontvangers niet opvragen');
 select throws_ok($$ select * from public.push_targets_partner_answered(1) $$, '42501', null, 'clients kunnen partner-ontvangers niet opvragen');
+select throws_ok($$ select public.push_webhook_secret() $$, '42501', null, 'clients kunnen het push-geheim niet opvragen');
 reset role;
 
 -- A antwoordt

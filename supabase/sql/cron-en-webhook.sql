@@ -1,10 +1,9 @@
 -- Eenmalig draaien in de Supabase SQL Editor (NIET als migratie: er staan projectgeheimen in).
 -- Kan veilig opnieuw gedraaid worden.
 --
--- Vooraf:
---   1. npx supabase functions deploy send-push --no-verify-jwt
---   2. npx supabase secrets set PUSH_WEBHOOK_SECRET=<lange willekeurige tekst>
---   3. Vul hieronder je project-URL en DEZELFDE geheime tekst in.
+-- Vooraf: npx supabase functions deploy send-push --no-verify-jwt
+-- Vul hieronder alleen je project-URL in. Het geheim wordt in de database gegenereerd (Vault);
+-- send-push leest het daar zelf uit via public.push_webhook_secret().
 
 create extension if not exists pg_net;
 create extension if not exists pg_cron;
@@ -12,16 +11,15 @@ create extension if not exists pg_cron;
 do $$
 declare
   v_url    constant text := 'https://JOUW-PROJECT-REF.supabase.co';  -- ← aanpassen
-  v_secret constant text := 'ZELFDE-WAARDE-ALS-PUSH_WEBHOOK_SECRET';  -- ← aanpassen
   v_id uuid;
 begin
   select id into v_id from vault.secrets where name = 'tweeklank_project_url';
   if v_id is null then perform vault.create_secret(v_url, 'tweeklank_project_url');
   else perform vault.update_secret(v_id, v_url); end if;
 
-  select id into v_id from vault.secrets where name = 'tweeklank_push_secret';
-  if v_id is null then perform vault.create_secret(v_secret, 'tweeklank_push_secret');
-  else perform vault.update_secret(v_id, v_secret); end if;
+  if not exists (select 1 from vault.secrets where name = 'tweeklank_push_secret') then
+    perform vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'tweeklank_push_secret');
+  end if;
 end;
 $$;
 

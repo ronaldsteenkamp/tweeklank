@@ -1,12 +1,12 @@
 // Verstuurt pushmeldingen via de Expo Push API.
 //
-// Aanroepen (alleen met de geheime header x-tweeklank-secret = PUSH_WEBHOOK_SECRET):
+// Aanroepen (alleen met de geheime header x-tweeklank-secret):
 //   * Database Webhook op INSERT in daily_answers  → body { type: 'INSERT', record: { id } }
 //   * pg_cron om 07:00 en 08:00 UTC                 → body { type: 'daily' }  (dagvraag + datumherinneringen,
 //                                                     alleen als het 9 uur is in Amsterdam)
 //
+// Het geheim leest de functie uit Vault (tweeklank_push_secret, via public.push_webhook_secret()).
 // Deploy: npx supabase functions deploy send-push --no-verify-jwt
-//         npx supabase secrets set PUSH_WEBHOOK_SECRET=<lange willekeurige tekst>
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import {
   chunk,
@@ -38,13 +38,24 @@ async function send(messages: PushMessage[]): Promise<{ sent: number; invalid: s
   return { sent: messages.length, invalid };
 }
 
+const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
+// Hetzelfde geheim dat de database-trigger en cron-jobs meesturen (Vault: tweeklank_push_secret).
+let cachedSecret: string | null = null;
+async function webhookSecret(): Promise<string | null> {
+  if (!cachedSecret) {
+    const { data } = await admin.rpc('push_webhook_secret');
+    cachedSecret = typeof data === 'string' && data.length > 0 ? data : null;
+  }
+  return cachedSecret;
+}
+
 Deno.serve(async (req) => {
-  const secret = Deno.env.get('PUSH_WEBHOOK_SECRET');
+  const secret = await webhookSecret();
   if (!secret || req.headers.get('x-tweeklank-secret') !== secret) return json({ error: 'forbidden' }, 403);
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
 
   const payload = await req.json().catch(() => ({}));
-  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
   let messages: PushMessage[] = [];
 

@@ -51,8 +51,8 @@ __tests__/          Jest-tests voor app-logica
 
 Het project **tweeklank** draait al:
 - **Waar:** organisatie *Tweeslag Wispo*, regio eu-central-1, project-ref `qexufuyxaxvsyaelpfkr`.
-- **Wat erin staat:** alle migraties (inclusief `…_hardening.sql`), de Edge Functions `delete-account` en `send-push`, de trigger en de cron-jobs voor meldingen.
-- **Geheim voor meldingen:** dat is in de database zelf gegenereerd en staat in de Vault als `tweeklank_push_secret`.
+- **Wat erin staat:** alle migraties (inclusief `…_hardening.sql` en `…_push_secret.sql`), de Edge Functions `delete-account` en `send-push`, de trigger en de cron-jobs voor meldingen.
+- **Geheim voor meldingen:** dat is in de database zelf gegenereerd en staat in de Vault als `tweeklank_push_secret`. `send-push` leest het daar zelf uit. Getest: met het juiste geheim antwoordt de functie `200`, met een fout geheim `403`.
 
 > De migraties zijn via de Supabase-connector en de SQL Editor toegepast, met andere namen dan de bestanden in `supabase/migrations/`. Wil je later `npx supabase db push` gebruiken? Draai dan eerst `npx supabase migration repair` (zie de Supabase-documentatie). Je kunt nieuwe migraties ook in de SQL Editor plakken.
 
@@ -79,17 +79,14 @@ Het project **tweeklank** draait al:
    npx supabase functions deploy delete-account
    ```
 6. **Pushmeldingen.** Dit kun je ook later doen; de app werkt prima zonder.
-   1. Kies een lange willekeurige geheime tekst, bijvoorbeeld de uitvoer van `openssl rand -hex 32`.
-   2. Deploy de functie en stel het geheim in:
-      ```bash
-      npx supabase functions deploy send-push --no-verify-jwt
-      npx supabase secrets set PUSH_WEBHOOK_SECRET=<jouw geheime tekst>
-      ```
-   3. Open `supabase/sql/cron-en-webhook.sql`. Vul daar je project-URL en **dezelfde** geheime tekst in en draai het bestand eenmalig in de *SQL Editor*. Het zet drie dingen klaar:
-      - een trigger voor *"partner heeft geantwoord"*;
-      - twee cron-jobs die om 9:00 Nederlandse tijd *"de vraag van vandaag staat klaar"* en de herinneringen aan belangrijke datums versturen;
-      - de geheimen in Vault.
-   4. Koppel de app aan een (gratis) Expo-account met `npx eas-cli init`. Dat zet de `projectId` in `app.json`, en die is nodig voor pushtokens.
+   1. Deploy de functie: `npx supabase functions deploy send-push --no-verify-jwt`.
+   2. Vul in `supabase/sql/cron-en-webhook.sql` je project-URL in en draai het bestand eenmalig in de *SQL Editor*. Dat zet klaar:
+      - de trigger voor *"partner heeft geantwoord"*;
+      - de cron-jobs voor 9:00 uur;
+      - een willekeurig geheim in de Vault.
+
+      `send-push` leest dat geheim zelf uit de Vault. Er is dus geen Edge Function-secret nodig.
+   3. Koppel de app aan een gratis Expo-account met `npx eas-cli init`. Dat is nodig voor de pushtokens.
 7. **Mailserver (voor echt gebruik).** Zie stap 3: zonder eigen SMTP-server kunnen alleen leden van je organisatie inloggen. Stel er een in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
 
 ## Lokaal testen met Expo Go
