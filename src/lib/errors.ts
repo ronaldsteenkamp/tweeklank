@@ -8,6 +8,8 @@ const MESSAGES: Record<string, string> = {
   al_gekoppeld: 'Je bent al gekoppeld aan een partner.',
   koppel_vol: 'Bij deze code hoort al een compleet koppel.',
   geen_partner: 'Koppel eerst je partner om de dagelijkse vraag te zien.',
+  quiz_niet_klaar: 'De uitslag verschijnt zodra jullie allebei klaar zijn.',
+  ongeldige_optie: 'Die keuze bestaat niet (meer). Kies een van de opties.',
   geen_vragen: 'Er zijn nog geen vragen geladen. Controleer de database-migraties.',
 };
 

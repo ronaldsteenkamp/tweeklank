@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { QuizKind, QuizResultRow } from './quiz';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
 function unwrap<T>({ data, error }: { data: T | null; error: unknown }): T {
@@ -123,4 +124,77 @@ export async function fetchArchiveDay(day: string): Promise<ArchiveDay | null> {
       .limit(1),
   ) as unknown as ArchiveDay[];
   return rows[0] ?? null;
+}
+
+// ---- Quizzen ----
+
+export type QuizOverview = {
+  quiz_id: number;
+  slug: string;
+  title: string;
+  description: string;
+  question_count: number;
+  my_progress: number;
+  partner_done: boolean;
+  my_score: number | null;
+  partner_score: number | null;
+};
+
+export type QuizQuestion = { id: number; position: number; prompt: string; options: string[] };
+export type QuizDetail = { id: number; slug: string; title: string; quiz_questions: QuizQuestion[] };
+
+export async function fetchQuizOverview(): Promise<QuizOverview[]> {
+  return unwrap(await supabase.rpc('quiz_overview')) as QuizOverview[];
+}
+
+export async function fetchQuiz(slug: string): Promise<QuizDetail> {
+  const quiz = unwrap(
+    await supabase
+      .from('quizzes')
+      .select('id, slug, title, quiz_questions(id, position, prompt, options)')
+      .eq('slug', slug)
+      .single(),
+  ) as QuizDetail;
+  quiz.quiz_questions.sort((a, b) => a.position - b.position);
+  return quiz;
+}
+
+export async function fetchMyQuizResponses(
+  quizId: number,
+  userId: string,
+): Promise<{ question_id: number; kind: QuizKind; option_index: number }[]> {
+  return unwrap(
+    await supabase
+      .from('quiz_responses')
+      .select('question_id, kind, option_index')
+      .eq('quiz_id', quizId)
+      .eq('user_id', userId),
+  ) as { question_id: number; kind: QuizKind; option_index: number }[];
+}
+
+export async function saveQuizResponse(params: {
+  coupleId: string;
+  userId: string;
+  quizId: number;
+  questionId: number;
+  kind: QuizKind;
+  optionIndex: number;
+}): Promise<void> {
+  unwrap(
+    await supabase.from('quiz_responses').upsert(
+      {
+        couple_id: params.coupleId,
+        user_id: params.userId,
+        quiz_id: params.quizId,
+        question_id: params.questionId,
+        kind: params.kind,
+        option_index: params.optionIndex,
+      },
+      { onConflict: 'couple_id,question_id,user_id,kind' },
+    ),
+  );
+}
+
+export async function fetchQuizResult(quizId: number): Promise<QuizResultRow[]> {
+  return unwrap(await supabase.rpc('quiz_result', { p_quiz: quizId })) as QuizResultRow[];
 }

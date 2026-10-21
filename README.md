@@ -13,7 +13,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 0 | Expo + TypeScript + expo-router, thema licht/donker, tests | ✅ |
 | 1 | Inloggen (e-mailcode), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
 | 2 | Streak-weergave, pushmeldingen | ✅ |
-| 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ⏳ |
+| 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ✅ |
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ⏳ |
 | 5 | Oefeningen & tips | ⏳ |
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ⏳ |
@@ -88,6 +88,12 @@ npx expo start
 5. Beantwoord de dagvraag op toestel 1. Op toestel 2 zie je alleen *"… heeft al geantwoord"*.
 6. Antwoord op toestel 2. Nu zien jullie allebei beide antwoorden en kunnen jullie reageren. Bij de ander verschijnt het live.
 
+**Quiz testen.**
+1. Open op beide toestellen het tabblad **Quiz** en kies dezelfde quiz.
+2. Beantwoord eerst tien vragen over jezelf en raad daarna wat je partner koos.
+3. Wie als eerste klaar is, ziet *"Wacht op …"*. Zodra jullie allebei klaar zijn, verschijnt de uitslag met jullie scores, overeenkomsten en verschillen.
+4. Na je laatste gok liggen je antwoorden vast.
+
 **Pushmeldingen testen.**
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.
 - **Android:** Expo Go ondersteunt geen pushmeldingen. Maak daarom een development build met `npx eas-cli build --profile development --platform android`. Dat kan gratis. Installeer de APK en start dan `npx expo start`.
@@ -101,8 +107,8 @@ npx expo start
 ```bash
 npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA), meldingen
 npm run typecheck       # TypeScript
-npm run check:content   # aantallen en dubbele vragen in de startcontent
-npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen (lokale PostgreSQL + pgTAP, geen Docker nodig)
+npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
+npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
 Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.

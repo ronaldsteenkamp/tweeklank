@@ -23,6 +23,8 @@ function ThemedStack() {
         }}
       >
         <Stack.Screen name="dag/[day]" options={{ headerShown: true, title: 'Uit het archief', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="quiz/[slug]/index" options={{ headerShown: true, title: 'Quiz', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="quiz/[slug]/resultaat" options={{ headerShown: true, title: 'Uitslag', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy', headerBackTitle: 'Terug' }} />
       </Stack>
     </>

@@ -49,6 +49,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="quiz"
+        options={{
+          title: 'Quiz',
+          tabBarIcon: ({ color, size }) => <Ionicons name="help-buoy-outline" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="archief"
         options={{
           title: 'Archief',

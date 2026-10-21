@@ -12,16 +12,38 @@ const sql = readdirSync(dir)
 const slugs = [...sql.matchAll(/\(\s*'([a-z0-9-]+)'\s*,/g)].map((m) => m[1]);
 const count = (prefix) => slugs.filter((s) => s.startsWith(prefix)).length;
 
+const quizSlugs = slugs.filter((s) => /^qz-[a-z]+$/.test(s));
+const quizQuestionsPer = (quiz) => slugs.filter((s) => new RegExp(`^${quiz}-\\d{2}$`).test(s)).length;
+
 const expectations = [
-  ['dagelijkse vragen', 'dv-', 60],
+  ['dagelijkse vragen', count('dv-'), 60],
+  ['quizzen', quizSlugs.length, 5],
+  ...quizSlugs.map((q) => [`  vragen in ${q}`, quizQuestionsPer(q), 10]),
 ];
 
 let ok = true;
-for (const [label, prefix, min] of expectations) {
-  const n = count(prefix);
+for (const [label, n, min] of expectations) {
   const pass = n >= min;
   ok &&= pass;
   console.log(`${pass ? '✓' : '✗'} ${label}: ${n} (minimaal ${min})`);
+}
+
+// Quizvragen: elke vraag 3-4 unieke opties, en geen dubbele vragen
+const quizRows = [...sql.matchAll(/\('(qz-[a-z]+-\d{2})', '[^']+', \d+, '((?:[^']|'')+)', '(\[.*?\])'\)/g)];
+for (const [, slug, , opts] of quizRows) {
+  const options = JSON.parse(opts.replace(/''/g, "'"));
+  if (options.length < 3 || options.length > 4 || new Set(options).size !== options.length) {
+    ok = false;
+    console.log(`✗ ${slug}: opties ongeldig of dubbel`);
+  }
+}
+const prompts = quizRows.map((m) => m[2].toLowerCase());
+const dupPrompts = prompts.filter((t, i) => prompts.indexOf(t) !== i);
+if (dupPrompts.length) {
+  ok = false;
+  console.log(`✗ dubbele quizvragen: ${dupPrompts.join(' | ')}`);
+} else {
+  console.log(`✓ quizopties en -vragen in orde (${quizRows.length} gecontroleerd)`);
 }
 
 const dupes = slugs.filter((s, i) => slugs.indexOf(s) !== i);
