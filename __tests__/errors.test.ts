@@ -10,4 +10,8 @@ describe('friendlyError', () => {
     expect(friendlyError({ message: 'iets onbekends' })).toBe('Er ging iets mis. Probeer het opnieuw.');
     expect(friendlyError(undefined)).toBe('Er ging iets mis. Probeer het opnieuw.');
   });
+
+  it('legt uit dat anoniem inloggen nog uit staat', () => {
+    expect(friendlyError({ message: 'Anonymous sign-ins are disabled' })).toMatch(/Allow anonymous sign-ins/);
+  });
 });

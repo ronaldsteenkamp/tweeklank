@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
 import { AppText, Button, Card, ErrorText, Field, Row, Screen } from '@/components/ui';
 import { deleteAccount, leaveCouple, updateProfile } from '@/lib/api';
-import { signOut } from '@/lib/auth';
+import { confirmSignOut, signOut } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
@@ -148,7 +148,7 @@ export default function Ik() {
       <Card>
         <AppText variant="large">Profiel</AppText>
         <AppText variant="small" muted>
-          {session?.user.email}
+          {session?.user.email ?? 'Account zonder e-mail, alleen op deze telefoon.'}
         </AppText>
         <Field
           label="Naam die je partner ziet"
@@ -268,7 +268,7 @@ export default function Ik() {
       <ErrorText message={error} />
 
       <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-        <Button kind="secondary" label="Uitloggen" onPress={() => signOut().then(() => router.replace('/'))} />
+        <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(!!session?.user.is_anonymous, () => router.replace('/'))} />
         <Button kind="danger" label="Account verwijderen" onPress={confirmDelete} busy={busy === 'delete'} />
       </View>
     </Screen>

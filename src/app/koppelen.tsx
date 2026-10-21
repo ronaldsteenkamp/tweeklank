@@ -9,13 +9,13 @@ import { friendlyError } from '@/lib/errors';
 import { extractInviteCode, formatInviteCode, inviteShareMessage, isValidInviteCode } from '@/lib/invite';
 import { takePendingInvite } from '@/lib/pendingInvite';
 import { useSession } from '@/lib/session';
-import { signOut } from '@/lib/auth';
+import { confirmSignOut } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
 export default function Koppelen() {
   const { colors } = useTheme();
-  const { me, partner, refresh } = useSession();
+  const { session, me, partner, refresh } = useSession();
   const [invite, setInvite] = useState<{ code: string; expires_at: string } | null>(null);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState<'create' | 'redeem' | null>(null);
@@ -140,7 +140,7 @@ export default function Koppelen() {
       </Card>
 
       <ErrorText message={error} />
-      <Button kind="ghost" label="Uitloggen" onPress={() => signOut().then(() => router.replace('/'))} />
+      <Button kind="ghost" label="Uitloggen" onPress={() => confirmSignOut(!!session?.user.is_anonymous, () => router.replace('/'))} />
     </Screen>
   );
 }

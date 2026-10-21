@@ -60,13 +60,10 @@ Het project **tweeklank** draait al:
 
 1. **Project aanmaken.** Maak een gratis project aan op [supabase.com](https://supabase.com). Kies bij voorkeur de regio *Central EU (Frankfurt)*.
 2. **Sleutels invullen.** Kopieer `.env.example` naar `.env` en vul `EXPO_PUBLIC_SUPABASE_URL` en `EXPO_PUBLIC_SUPABASE_ANON_KEY` in. Je vindt ze onder *Project Settings → API*.
-3. **Inloggen via de link in de e-mail.** Dit werkt zonder eigen mailserver en zonder de templates aan te passen.
-   - **Terug-links toestaan:** ga naar *Authentication → URL Configuration → Redirect URLs* en voeg deze twee toe:
-     - `exp://**` voor Expo Go;
-     - `tweeklank://**` voor de echte app.
-   - **Wie mail krijgt:** zonder eigen SMTP verstuurt Supabase alleen mails naar e-mailadressen van leden van je organisatie, en maar een paar per uur. Nodig je partner dus uit via *Organization settings → Team → Invite*.
-   - **Op welke telefoon:** open de mail op dezelfde telefoon als de app en tik op de link. De app opent en je bent ingelogd.
-   - **Later, voor echte gebruikers:** stel een eigen SMTP-server in, bijvoorbeeld de gratis tier van Brevo. Dan kun je de templates ook aanpassen, zodat de mail een 6-cijferige code toont (`{{ .Token }}`). Dat invoerveld zit al in de app.
+3. **Inloggen zonder e-mail aanzetten.** Ga naar *Authentication → Sign In / Providers* en zet **Allow anonymous sign-ins** aan. Dat is alles.
+   - In de app tik je op **Beginnen**. Daarna kies je een naam en koppel je met de uitnodigingscode. Er is geen e-mail of wachtwoord nodig.
+   - Het account bestaat alleen op die telefoon. Verwijder je de app of raak je je telefoon kwijt, dan begin je opnieuw. De app waarschuwt hiervoor bij uitloggen.
+   - *Optioneel:* via *Liever inloggen met e-mail* kan het ook met een inloglink. Dat werkt pas goed met een eigen SMTP-server, bijvoorbeeld de gratis tier van Brevo. Zet dan ook `exp://**` en `tweeklank://**` bij *Authentication → URL Configuration → Redirect URLs*.
 4. **Database vullen.** Zet het schema, de RLS-policies en de vragen in je project:
    ```bash
    npx supabase login
@@ -87,7 +84,7 @@ Het project **tweeklank** draait al:
 
       `send-push` leest dat geheim zelf uit de Vault. Er is dus geen Edge Function-secret nodig.
    3. Koppel de app aan een gratis Expo-account met `npx eas-cli init`. Dat is nodig voor de pushtokens.
-7. **Mailserver (voor echt gebruik).** Zie stap 3: zonder eigen SMTP-server kunnen alleen leden van je organisatie inloggen. Stel er een in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
+7. **Mailserver (optioneel).** Alleen nodig als je ook inloggen met e-mail wilt aanbieden. Stel er een in onder *Authentication → Emails → SMTP Settings*.
 
 ## Lokaal testen met Expo Go
 
@@ -97,9 +94,9 @@ npx expo start
 ```
 
 1. Scan de QR-code met **Expo Go** (iOS: met de camera, Android: in de Expo Go-app).
-2. Log in met je e-mailadres. Open de mail **op dezelfde telefoon** en tik op de inloglink.
+2. Tik op **Beginnen**. Je hebt geen e-mail of wachtwoord nodig.
 3. Kies een naam en tik op **Maak een code**.
-4. Log op een **tweede toestel** (of een simulator/emulator) in met een **ander e-mailadres** en vul de code in.
+4. Tik op een **tweede toestel** (of een simulator/emulator) ook op **Beginnen** en vul de code in.
 5. Beantwoord de dagvraag op toestel 1. Op toestel 2 zie je alleen *"… heeft al geantwoord"*.
 6. Antwoord op toestel 2. Nu zien jullie allebei beide antwoorden en kunnen jullie reageren. Bij de ander verschijnt het live.
 

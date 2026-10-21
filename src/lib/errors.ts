@@ -23,6 +23,7 @@ export function friendlyError(err: unknown): string {
   const key = Object.keys(MESSAGES).find((k) => raw.includes(k));
   if (key) return MESSAGES[key];
   if (/network|fetch/i.test(raw)) return 'Geen verbinding. Controleer je internet en probeer het opnieuw.';
+  if (/anonymous sign-ins are disabled/i.test(raw)) return 'Inloggen zonder e-mail staat nog uit in Supabase (Authentication → Sign In / Providers → Allow anonymous sign-ins).';
   if (/rate limit|too many/i.test(raw)) return 'Even rustig aan: probeer het over een paar minuten opnieuw.';
   if (/token.*(expired|invalid)|otp/i.test(raw)) return 'Die code klopt niet of is verlopen. Vraag een nieuwe aan.';
   return 'Er ging iets mis. Probeer het opnieuw.';
