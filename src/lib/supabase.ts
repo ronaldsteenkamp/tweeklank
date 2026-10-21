@@ -14,6 +14,8 @@ export const supabase = createClient(url ?? 'http://localhost', anonKey ?? 'ontb
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // Inloglink: de sessie komt in het #-deel van de terug-link (zie src/app/auth-callback.tsx)
+    flowType: 'implicit',
   },
 });
 

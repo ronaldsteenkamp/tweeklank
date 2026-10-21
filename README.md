@@ -60,14 +60,13 @@ Het project **tweeklank** draait al:
 
 1. **Project aanmaken.** Maak een gratis project aan op [supabase.com](https://supabase.com). Kies bij voorkeur de regio *Central EU (Frankfurt)*.
 2. **Sleutels invullen.** Kopieer `.env.example` naar `.env` en vul `EXPO_PUBLIC_SUPABASE_URL` en `EXPO_PUBLIC_SUPABASE_ANON_KEY` in. Je vindt ze onder *Project Settings → API*.
-3. **E-mailcode instellen.**
-   - Ga naar *Authentication → Sign In / Providers → Email*. Zet *Email* aan en controleer dat *Email OTP Length* op **6** staat.
-   - Ga naar *Authentication → Emails → Templates*. Vervang in de templates **Magic Link** en **Confirm signup** de link door de code, bijvoorbeeld:
-     ```html
-     <h2>Je inlogcode voor Tweeklank</h2>
-     <p>Vul deze code in de app in:</p>
-     <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
-     ```
+3. **Inloggen via de link in de e-mail.** Dit werkt zonder eigen mailserver en zonder de templates aan te passen.
+   - **Terug-links toestaan:** ga naar *Authentication → URL Configuration → Redirect URLs* en voeg deze twee toe:
+     - `exp://**` voor Expo Go;
+     - `tweeklank://**` voor de echte app.
+   - **Wie mail krijgt:** zonder eigen SMTP verstuurt Supabase alleen mails naar e-mailadressen van leden van je organisatie, en maar een paar per uur. Nodig je partner dus uit via *Organization settings → Team → Invite*.
+   - **Op welke telefoon:** open de mail op dezelfde telefoon als de app en tik op de link. De app opent en je bent ingelogd.
+   - **Later, voor echte gebruikers:** stel een eigen SMTP-server in, bijvoorbeeld de gratis tier van Brevo. Dan kun je de templates ook aanpassen, zodat de mail een 6-cijferige code toont (`{{ .Token }}`). Dat invoerveld zit al in de app.
 4. **Database vullen.** Zet het schema, de RLS-policies en de vragen in je project:
    ```bash
    npx supabase login
@@ -91,7 +90,7 @@ Het project **tweeklank** draait al:
       - twee cron-jobs die om 9:00 Nederlandse tijd *"de vraag van vandaag staat klaar"* en de herinneringen aan belangrijke datums versturen;
       - de geheimen in Vault.
    4. Koppel de app aan een (gratis) Expo-account met `npx eas-cli init`. Dat zet de `projectId` in `app.json`, en die is nodig voor pushtokens.
-7. **Mailserver (voor echt gebruik).** De ingebouwde mailserver van Supabase verstuurt maar een paar mails per uur. Dat is genoeg om te testen. Voor echte gebruikers stel je een eigen SMTP-server in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
+7. **Mailserver (voor echt gebruik).** Zie stap 3: zonder eigen SMTP-server kunnen alleen leden van je organisatie inloggen. Stel er een in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
 
 ## Lokaal testen met Expo Go
 
@@ -101,7 +100,7 @@ npx expo start
 ```
 
 1. Scan de QR-code met **Expo Go** (iOS: met de camera, Android: in de Expo Go-app).
-2. Log in met je e-mailadres en de code uit de mail.
+2. Log in met je e-mailadres. Open de mail **op dezelfde telefoon** en tik op de inloglink.
 3. Kies een naam en tik op **Maak een code**.
 4. Log op een **tweede toestel** (of een simulator/emulator) in met een **ander e-mailadres** en vul de code in.
 5. Beantwoord de dagvraag op toestel 1. Op toestel 2 zie je alleen *"… heeft al geantwoord"*.

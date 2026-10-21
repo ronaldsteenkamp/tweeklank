@@ -1,3 +1,4 @@
+import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
@@ -34,9 +35,12 @@ export default function Code() {
 
   const resend = async () => {
     setError(null);
-    const { error: err } = await supabase.auth.signInWithOtp({ email: String(email) });
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email: String(email),
+      options: { emailRedirectTo: Linking.createURL('auth-callback') },
+    });
     if (err) setError(friendlyError(err));
-    else setInfo('We hebben een nieuwe code gestuurd.');
+    else setInfo('We hebben een nieuwe mail gestuurd.');
   };
 
   return (
@@ -45,10 +49,15 @@ export default function Code() {
         <View style={{ flex: 1, justifyContent: 'center', gap: spacing.lg }}>
           <AppText variant="title">Check je mail</AppText>
           <AppText>
-            We hebben een code gestuurd naar <AppText variant="label">{email}</AppText>. Vul hem hieronder in.
+            We hebben een mail gestuurd naar <AppText variant="label">{email}</AppText>. Open die{' '}
+            <AppText variant="label">op deze telefoon</AppText> en tik op de inloglink. De app opent dan vanzelf en je bent
+            ingelogd.
+          </AppText>
+          <AppText variant="small" muted>
+            Staat er in plaats van een link een code van 6 cijfers in de mail? Vul die dan hieronder in.
           </AppText>
           <Field
-            label="Code uit de e-mail"
+            label="Code uit de e-mail (alleen als die erin staat)"
             value={token}
             onChangeText={setToken}
             keyboardType="number-pad"
@@ -60,8 +69,8 @@ export default function Code() {
             onSubmitEditing={() => valid && verify()}
             error={error}
           />
-          <Button label="Inloggen" onPress={verify} disabled={!valid} busy={busy} />
-          <Button kind="ghost" label="Stuur een nieuwe code" onPress={resend} />
+          <Button kind="secondary" label="Inloggen met code" onPress={verify} disabled={!valid} busy={busy} />
+          <Button kind="ghost" label="Stuur een nieuwe mail" onPress={resend} />
           {info ? <AppText variant="small" muted accessibilityLiveRegion="polite">{info}</AppText> : null}
           <Button kind="ghost" label="Ander e-mailadres" onPress={() => router.back()} />
         </View>

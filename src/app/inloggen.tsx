@@ -1,3 +1,4 @@
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
@@ -21,7 +22,10 @@ export default function Inloggen() {
     setBusy(true);
     setError(null);
     const address = email.trim().toLowerCase();
-    const { error: err } = await supabase.auth.signInWithOtp({ email: address, options: { shouldCreateUser: true } });
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email: address,
+      options: { shouldCreateUser: true, emailRedirectTo: Linking.createURL('auth-callback') },
+    });
     setBusy(false);
     if (err) return setError(friendlyError(err));
     router.push({ pathname: '/code', params: { email: address } });
@@ -40,8 +44,8 @@ export default function Inloggen() {
             </AppText>
           </View>
           <AppText>
-            Vul je e-mailadres in. Je krijgt een code van 6 cijfers, zonder wachtwoord. Heb je nog geen account? Dan maken we er
-            meteen een aan.
+            Vul je e-mailadres in. Je krijgt een mail met een inloglink, zonder wachtwoord. Heb je nog geen account? Dan maken we
+            er meteen een aan.
           </AppText>
           <Field
             label="E-mailadres"
@@ -56,7 +60,7 @@ export default function Inloggen() {
             onSubmitEditing={() => valid && send()}
             error={error}
           />
-          <Button label="Stuur mij een code" onPress={send} disabled={!valid} busy={busy} />
+          <Button label="Stuur mij een inloglink" onPress={send} disabled={!valid} busy={busy} />
           <AppText variant="small" muted>
             Helemaal gratis. Geen advertenties, geen abonnement en geen tracking.
           </AppText>
