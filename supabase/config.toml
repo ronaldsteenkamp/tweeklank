@@ -1,0 +1,13 @@
+# Configuratie voor de Supabase CLI (lokaal ontwikkelen, migraties, functies).
+project_id = "tweeklank"
+
+[auth]
+site_url = "tweeklank://"
+
+[auth.email]
+enable_signup = true
+otp_length = 6
+otp_expiry = 3600
+
+[functions.delete-account]
+verify_jwt = true

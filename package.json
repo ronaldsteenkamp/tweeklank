@@ -1,22 +1,69 @@
 {
   "name": "tweeklank",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.16",
+    "expo-clipboard": "~58.0.3",
+    "expo-constants": "~58.0.12",
+    "expo-device": "~58.0.5",
+    "expo-font": "~58.0.9",
+    "expo-linking": "~58.0.13",
+    "expo-notifications": "~58.1.5",
+    "expo-router": "~58.0.24",
+    "expo-secure-store": "~58.0.2",
     "expo-status-bar": "~58.0.3",
+    "jest-expo": "~58.0.11",
     "react": "19.3.0",
-    "react-native": "0.88.0"
+    "react-dom": "^19.3.0",
+    "react-native": "0.88.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-screens": "~4.30.0",
+    "react-native-url-polyfill": "^4.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.15",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:db": "bash scripts/test-db.sh",
+    "check:content": "node scripts/check-content.mjs"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/__tests__"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "strict": true,
+            "esModuleInterop": true,
+            "module": "commonjs",
+            "target": "es2022",
+            "types": [
+              "jest",
+              "node"
+            ]
+          }
+        }
+      ]
+    }
+  }
 }

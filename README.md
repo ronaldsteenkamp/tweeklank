@@ -1,0 +1,111 @@
+# Tweeklank
+
+Een **volledig gratis** relatie-app voor koppels. Er is geen abonnement, geen premium-laag, geen in-app aankoop en geen advertentie. Ook tracking of analytics van derden zit er niet in.
+
+Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het antwoord van je partner zie je pas als je zelf hebt geantwoord.
+
+> Werktitel *Tweeklank*. Alternatieve namen: *Wijzer*, *Nestje*.
+
+## Status
+
+| Fase | Inhoud | Status |
+|---|---|---|
+| 0 | Expo + TypeScript + expo-router, thema licht/donker, tests | ✅ |
+| 1 | Inloggen (e-mailcode), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
+| 2 | Streak-weergave (✅), pushmeldingen | ⏳ |
+| 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ⏳ |
+| 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ⏳ |
+| 5 | Oefeningen & tips | ⏳ |
+| 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ⏳ |
+| 7 | Afronding: toegankelijkheid, privacy, store-builds | ⏳ |
+
+## Techniek
+
+- **App:** Expo SDK 58, React Native, TypeScript, expo-router (`src/app`)
+- **Backend:** Supabase (Auth, Postgres, Row Level Security, Realtime, Edge Functions)
+- **Content:** vragen staan als SQL-migraties in `supabase/migrations/` en zijn uit te breiden met een nieuwe migratie
+
+```
+src/app/            schermen (expo-router)
+src/components/     UI-bouwstenen
+src/lib/            Supabase-client, API, datum- en codehelpers
+src/theme/          kleuren (licht/donker) en ThemeProvider
+supabase/migrations schema, RLS, functies en content
+supabase/tests      pgTAP-tests (koppelen, zichtbaarheid, streaks)
+supabase/functions  Edge Functions (delete-account)
+__tests__/          Jest-tests voor app-logica
+```
+
+## Supabase opzetten
+
+1. **Project aanmaken.** Maak een gratis project aan op [supabase.com](https://supabase.com). Kies bij voorkeur de regio *Central EU (Frankfurt)*.
+2. **Sleutels invullen.** Kopieer `.env.example` naar `.env` en vul `EXPO_PUBLIC_SUPABASE_URL` en `EXPO_PUBLIC_SUPABASE_ANON_KEY` in. Je vindt ze onder *Project Settings → API*.
+3. **E-mailcode instellen.**
+   - Ga naar *Authentication → Sign In / Providers → Email*. Zet *Email* aan en controleer dat *Email OTP Length* op **6** staat.
+   - Ga naar *Authentication → Emails → Templates*. Vervang in de templates **Magic Link** en **Confirm signup** de link door de code, bijvoorbeeld:
+     ```html
+     <h2>Je inlogcode voor Tweeklank</h2>
+     <p>Vul deze code in de app in:</p>
+     <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
+     ```
+4. **Database vullen.** Zet het schema, de RLS-policies en de vragen in je project:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <jouw-project-ref>
+   npx supabase db push
+   ```
+   Heb je liever geen CLI? Plak dan de bestanden uit `supabase/migrations/` op volgorde in de *SQL Editor*.
+5. **Account verwijderen mogelijk maken.** Deploy de Edge Function:
+   ```bash
+   npx supabase functions deploy delete-account
+   ```
+6. **Mailserver (voor echt gebruik).** De ingebouwde mailserver van Supabase verstuurt maar een paar mails per uur. Dat is genoeg om te testen. Voor echte gebruikers stel je een eigen SMTP-server in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
+
+## Lokaal testen met Expo Go
+
+```bash
+npm install
+npx expo start
+```
+
+1. Scan de QR-code met **Expo Go** (iOS: met de camera, Android: in de Expo Go-app).
+2. Log in met je e-mailadres en de code uit de mail.
+3. Kies een naam en tik op **Maak een code**.
+4. Log op een **tweede toestel** (of een simulator/emulator) in met een **ander e-mailadres** en vul de code in.
+5. Beantwoord de dagvraag op toestel 1. Op toestel 2 zie je alleen *"… heeft al geantwoord"*.
+6. Antwoord op toestel 2. Nu zien jullie allebei beide antwoorden en kunnen jullie reageren. Bij de ander verschijnt het live.
+
+**Uitnodigingslink.** De link uit *Deel uitnodiging* opent in Expo Go als `exp://…/--/koppel/CODE`. In een echte build wordt dat `tweeklank://koppel/CODE`.
+
+## Tests
+
+```bash
+npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA)
+npm run typecheck       # TypeScript
+npm run check:content   # aantallen en dubbele vragen in de startcontent
+npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks (lokale PostgreSQL + pgTAP, geen Docker nodig)
+```
+
+Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.
+
+Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabase test db`.
+
+## Privacy by design
+
+- **RLS op elke tabel.** Je leest alleen je eigen data en die van je gekoppelde partner.
+- **Verborgen antwoorden.** Het antwoord van je partner blijft in de database zelf onzichtbaar tot je zelf hebt geantwoord. Dat geldt ook voor Realtime.
+- **Antwoorden zijn definitief.** Je kunt geen antwoorden geven voor een eerdere dag. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
+- **Ontkoppelen wist alles.** Bij ontkoppelen verdwijnt alle gedeelde data voor jullie allebei. *Account verwijderen* wist daarnaast je account.
+- **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
+
+## Content uitbreiden
+
+Voeg een nieuwe migratie toe, bijvoorbeeld `supabase/migrations/20270101000000_meer_vragen.sql`:
+
+```sql
+insert into public.daily_questions (slug, position, depth, text) values
+  ('dv-061', 61, 2, 'Jouw nieuwe vraag?')
+on conflict (slug) do nothing;
+```
+
+Draai daarna `npx supabase db push` en `npm run check:content`.
