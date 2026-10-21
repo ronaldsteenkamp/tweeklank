@@ -18,6 +18,7 @@ const quizQuestionsPer = (quiz) => slugs.filter((s) => new RegExp(`^${quiz}-\\d{
 const expectations = [
   ['dagelijkse vragen', count('dv-'), 60],
   ['quizzen', quizSlugs.length, 5],
+  ['oefeningen', count('ex-'), 12],
   ...quizSlugs.map((q) => [`  vragen in ${q}`, quizQuestionsPer(q), 10]),
 ];
 

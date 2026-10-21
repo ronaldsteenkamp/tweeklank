@@ -44,7 +44,7 @@ export default function Archief() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['left', 'right']}>
       <FlatList
         data={days ?? []}
         keyExtractor={(d) => d.day}
@@ -62,7 +62,6 @@ export default function Archief() {
         }
         ListHeaderComponent={
           <View style={{ gap: spacing.sm }}>
-            <AppText variant="title">Archief</AppText>
             <AppText muted>Alle vragen die jullie samen kregen, met jullie antwoorden.</AppText>
             <ErrorText message={error} />
           </View>

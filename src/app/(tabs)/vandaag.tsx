@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -101,6 +101,14 @@ export default function Vandaag() {
             <Pill label={`🔥 ${today.streak} ${today.streak === 1 ? 'dag' : 'dagen'} samen`} />
           )}
         </Row>
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Button
+            kind="ghost"
+            label="Archief: eerdere vragen"
+            onPress={() => router.push('/archief')}
+            accessibilityHint="Bekijk alle eerdere vragen en antwoorden"
+          />
+        </View>
 
         <Card tone="alt">
           <AppText variant="label" color={colors.secondary}>

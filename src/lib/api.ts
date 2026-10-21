@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
+import type { Completion, Exercise } from './exercises';
 import type { QuizKind, QuizResultRow } from './quiz';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
@@ -263,4 +264,39 @@ export async function setCardMark(params: {
         .eq('kind', params.kind),
     );
   }
+}
+
+// ---- Oefeningen ----
+
+export async function fetchExercises(): Promise<Exercise[]> {
+  return unwrap(await supabase.from('exercises').select('*').order('position')) as Exercise[];
+}
+
+export async function fetchExercise(slug: string): Promise<Exercise | null> {
+  const rows = unwrap(await supabase.from('exercises').select('*').eq('slug', slug).limit(1)) as Exercise[];
+  return rows[0] ?? null;
+}
+
+export async function fetchCompletions(exerciseId?: number): Promise<Completion[]> {
+  let q = supabase
+    .from('exercise_completions')
+    .select('id, exercise_id, user_id, completed_at, note')
+    .order('completed_at', { ascending: false });
+  if (exerciseId) q = q.eq('exercise_id', exerciseId);
+  return unwrap(await q) as Completion[];
+}
+
+export async function addCompletion(params: { coupleId: string; userId: string; exerciseId: number; note?: string }): Promise<void> {
+  unwrap(
+    await supabase.from('exercise_completions').insert({
+      couple_id: params.coupleId,
+      user_id: params.userId,
+      exercise_id: params.exerciseId,
+      note: params.note?.trim() || null,
+    }),
+  );
+}
+
+export async function removeCompletion(id: number): Promise<void> {
+  unwrap(await supabase.from('exercise_completions').delete().eq('id', id));
 }

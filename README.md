@@ -15,7 +15,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 2 | Streak-weergave, pushmeldingen | ✅ |
 | 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ✅ |
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ✅ |
-| 5 | Oefeningen & tips | ⏳ |
+| 5 | Oefeningen & tips | ✅ |
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ⏳ |
 | 7 | Afronding: toegankelijkheid, privacy, store-builds | ⏳ |
 
@@ -114,7 +114,7 @@ npx expo start
 npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA), meldingen
 npm run typecheck       # TypeScript
 npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
-npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen, kaarten (lokale PostgreSQL + pgTAP, geen Docker nodig)
+npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen, kaarten, oefeningen (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
 Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.

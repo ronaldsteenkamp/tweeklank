@@ -26,6 +26,9 @@ function ThemedStack() {
         <Stack.Screen name="quiz/[slug]/index" options={{ headerShown: true, title: 'Quiz', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="quiz/[slug]/resultaat" options={{ headerShown: true, title: 'Uitslag', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="kaarten/[thema]" options={{ headerShown: true, title: 'Kaarten', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="archief" options={{ headerShown: true, title: 'Archief', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="oefeningen/index" options={{ headerShown: true, title: 'Oefeningen', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="oefeningen/[slug]" options={{ headerShown: true, title: 'Oefening', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy', headerBackTitle: 'Terug' }} />
       </Stack>
     </>

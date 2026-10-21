@@ -63,10 +63,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="archief"
+        name="samen"
         options={{
-          title: 'Archief',
-          tabBarIcon: ({ color, size }) => <Ionicons name="albums-outline" color={color as string} size={size} />,
+          title: 'Samen',
+          tabBarIcon: ({ color, size }) => <Ionicons name="heart-circle-outline" color={color as string} size={size} />,
         }}
       />
       <Tabs.Screen
