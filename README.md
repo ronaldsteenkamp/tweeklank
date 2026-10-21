@@ -12,7 +12,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 |---|---|---|
 | 0 | Expo + TypeScript + expo-router, thema licht/donker, tests | ✅ |
 | 1 | Inloggen (e-mailcode), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
-| 2 | Streak-weergave (✅), pushmeldingen | ⏳ |
+| 2 | Streak-weergave, pushmeldingen | ✅ |
 | 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ⏳ |
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ⏳ |
 | 5 | Oefeningen & tips | ⏳ |
@@ -32,7 +32,8 @@ src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
 supabase/tests      pgTAP-tests (koppelen, zichtbaarheid, streaks)
-supabase/functions  Edge Functions (delete-account)
+supabase/functions  Edge Functions (delete-account, send-push)
+supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
 ```
 
@@ -59,7 +60,19 @@ __tests__/          Jest-tests voor app-logica
    ```bash
    npx supabase functions deploy delete-account
    ```
-6. **Mailserver (voor echt gebruik).** De ingebouwde mailserver van Supabase verstuurt maar een paar mails per uur. Dat is genoeg om te testen. Voor echte gebruikers stel je een eigen SMTP-server in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
+6. **Pushmeldingen.** Dit kun je ook later doen; de app werkt prima zonder.
+   1. Kies een lange willekeurige geheime tekst, bijvoorbeeld de uitvoer van `openssl rand -hex 32`.
+   2. Deploy de functie en stel het geheim in:
+      ```bash
+      npx supabase functions deploy send-push --no-verify-jwt
+      npx supabase secrets set PUSH_WEBHOOK_SECRET=<jouw geheime tekst>
+      ```
+   3. Open `supabase/sql/cron-en-webhook.sql`. Vul daar je project-URL en **dezelfde** geheime tekst in en draai het bestand eenmalig in de *SQL Editor*. Het zet drie dingen klaar:
+      - een trigger voor *"partner heeft geantwoord"*;
+      - twee cron-jobs voor *"de vraag van vandaag staat klaar"*, om 9:00 Nederlandse tijd;
+      - de geheimen in Vault.
+   4. Koppel de app aan een (gratis) Expo-account met `npx eas-cli init`. Dat zet de `projectId` in `app.json`, en die is nodig voor pushtokens.
+7. **Mailserver (voor echt gebruik).** De ingebouwde mailserver van Supabase verstuurt maar een paar mails per uur. Dat is genoeg om te testen. Voor echte gebruikers stel je een eigen SMTP-server in onder *Authentication → Emails → SMTP Settings*. Veel aanbieders hebben een gratis tier.
 
 ## Lokaal testen met Expo Go
 
@@ -75,15 +88,21 @@ npx expo start
 5. Beantwoord de dagvraag op toestel 1. Op toestel 2 zie je alleen *"… heeft al geantwoord"*.
 6. Antwoord op toestel 2. Nu zien jullie allebei beide antwoorden en kunnen jullie reageren. Bij de ander verschijnt het live.
 
+**Pushmeldingen testen.**
+- **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.
+- **Android:** Expo Go ondersteunt geen pushmeldingen. Maak daarom een development build met `npx eas-cli build --profile development --platform android`. Dat kan gratis. Installeer de APK en start dan `npx expo start`.
+- Werkt de trigger? Kijk in de logs van de Edge Function `send-push` in het dashboard.
+- Testen zonder op 9 uur te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"daily","force":true}'::jsonb);`.
+
 **Uitnodigingslink.** De link uit *Deel uitnodiging* opent in Expo Go als `exp://…/--/koppel/CODE`. In een echte build wordt dat `tweeklank://koppel/CODE`.
 
 ## Tests
 
 ```bash
-npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA)
+npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA), meldingen
 npm run typecheck       # TypeScript
 npm run check:content   # aantallen en dubbele vragen in de startcontent
-npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks (lokale PostgreSQL + pgTAP, geen Docker nodig)
+npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
 Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.
@@ -97,6 +116,7 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Antwoorden zijn definitief.** Je kunt geen antwoorden geven voor een eerdere dag. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
 - **Ontkoppelen wist alles.** Bij ontkoppelen verdwijnt alle gedeelde data voor jullie allebei. *Account verwijderen* wist daarnaast je account.
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
+- **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
 
 ## Content uitbreiden
 

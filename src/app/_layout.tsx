@@ -1,8 +1,11 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { configureNotificationHandler } from '@/lib/push';
 import { SessionProvider } from '@/lib/session';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+
+configureNotificationHandler();
 
 function ThemedStack() {
   const { colors, scheme } = useTheme();

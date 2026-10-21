@@ -1,13 +1,31 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Redirect } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { Redirect, router } from 'expo-router';
+import { useEffect } from 'react';
 import Tabs from 'expo-router/js-tabs';
 import { Loading } from '@/components/ui';
+import { registerForPush } from '@/lib/push';
 import { useSession } from '@/lib/session';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const { loading, session, partner } = useSession();
+  const { loading, session, me, partner } = useSession();
+  const wantsPush = !!me && (me.notify_new_question || me.notify_partner_answered);
+
+  // Token stil vernieuwen (zonder om toestemming te vragen) als meldingen aan staan.
+  useEffect(() => {
+    if (session && partner && wantsPush) registerForPush({ prompt: false });
+  }, [session, partner, wantsPush]);
+
+  // Tikken op een melding opent het juiste scherm.
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = response.notification.request.content.data?.url;
+      if (url === '/vandaag') router.navigate('/vandaag');
+    });
+    return () => sub.remove();
+  }, []);
 
   if (loading) return <Loading />;
   if (!session || !partner) return <Redirect href="/" />;

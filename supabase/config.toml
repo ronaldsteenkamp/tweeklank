@@ -11,3 +11,7 @@ otp_expiry = 3600
 
 [functions.delete-account]
 verify_jwt = true
+
+[functions.send-push]
+# Beveiligd met de header x-tweeklank-secret in plaats van een gebruikers-JWT
+verify_jwt = false

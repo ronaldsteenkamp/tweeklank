@@ -9,7 +9,7 @@ import { friendlyError } from '@/lib/errors';
 import { extractInviteCode, formatInviteCode, inviteShareMessage, isValidInviteCode } from '@/lib/invite';
 import { takePendingInvite } from '@/lib/pendingInvite';
 import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { signOut } from '@/lib/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
@@ -140,7 +140,7 @@ export default function Koppelen() {
       </Card>
 
       <ErrorText message={error} />
-      <Button kind="ghost" label="Uitloggen" onPress={() => supabase.auth.signOut().then(() => router.replace('/'))} />
+      <Button kind="ghost" label="Uitloggen" onPress={() => signOut().then(() => router.replace('/'))} />
     </Screen>
   );
 }
