@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { QuizKind, QuizResultRow } from './quiz';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
@@ -197,4 +198,69 @@ export async function saveQuizResponse(params: {
 
 export async function fetchQuizResult(quizId: number): Promise<QuizResultRow[]> {
   return unwrap(await supabase.rpc('quiz_result', { p_quiz: quizId })) as QuizResultRow[];
+}
+
+// ---- Gesprekskaarten ----
+
+export type ThemeSummary = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  is_explicit: boolean;
+  position: number;
+  theme_questions: { id: number }[];
+};
+
+export type ThemeDetail = Omit<ThemeSummary, 'theme_questions'> & { theme_questions: CardQuestion[] };
+
+export async function fetchThemes(): Promise<ThemeSummary[]> {
+  return unwrap(
+    await supabase
+      .from('themes')
+      .select('id, slug, name, description, icon, is_explicit, position, theme_questions(id)')
+      .order('position'),
+  ) as ThemeSummary[];
+}
+
+export async function fetchTheme(slug: string): Promise<ThemeDetail | null> {
+  const rows = unwrap(
+    await supabase
+      .from('themes')
+      .select('id, slug, name, description, icon, is_explicit, position, theme_questions(id, position, text, depth)')
+      .eq('slug', slug)
+      .limit(1),
+  ) as ThemeDetail[];
+  return rows[0] ?? null;
+}
+
+export async function fetchCardMarks(): Promise<CardMark[]> {
+  return unwrap(await supabase.from('card_marks').select('question_id, kind')) as CardMark[];
+}
+
+export async function setCardMark(params: {
+  coupleId: string;
+  userId: string;
+  questionId: number;
+  kind: MarkKind;
+  on: boolean;
+}): Promise<void> {
+  if (params.on) {
+    unwrap(
+      await supabase.from('card_marks').upsert(
+        { couple_id: params.coupleId, question_id: params.questionId, kind: params.kind, created_by: params.userId },
+        { onConflict: 'couple_id,question_id,kind', ignoreDuplicates: true },
+      ),
+    );
+  } else {
+    unwrap(
+      await supabase
+        .from('card_marks')
+        .delete()
+        .eq('couple_id', params.coupleId)
+        .eq('question_id', params.questionId)
+        .eq('kind', params.kind),
+    );
+  }
 }

@@ -46,6 +46,37 @@ if (dupPrompts.length) {
   console.log(`✓ quizopties en -vragen in orde (${quizRows.length} gecontroleerd)`);
 }
 
+// Gesprekskaarten: 8 gewone thema's + 18+-set, elk 15 vragen met alle drie de diepgangen
+const themeRows = [...sql.matchAll(/\('(th-[a-z]+)', \d+, '(?:[^']|'')+', '(?:[^']|'')+', '[a-z-]+', (true|false)\)/g)];
+const cardRows = [...sql.matchAll(/\('(th-[a-z]+)-\d{2}', '(th-[a-z]+)', \d+, ([123]), '((?:[^']|'')+)'\)/g)];
+const regularThemes = themeRows.filter((m) => m[2] === 'false').map((m) => m[1]);
+const explicitThemes = themeRows.filter((m) => m[2] === 'true').map((m) => m[1]);
+const themeChecks = [
+  ["gewone thema's", regularThemes.length, 8],
+  ['18+-thema', explicitThemes.length, 1],
+  ...[...regularThemes, ...explicitThemes].map((t) => [`  kaarten in ${t}`, cardRows.filter((m) => m[2] === t).length, 15]),
+];
+for (const [label, n, min] of themeChecks) {
+  const pass = n >= min;
+  ok &&= pass;
+  console.log(`${pass ? '✓' : '✗'} ${label}: ${n} (minimaal ${min})`);
+}
+for (const t of [...regularThemes, ...explicitThemes]) {
+  const depths = new Set(cardRows.filter((m) => m[2] === t).map((m) => m[3]));
+  if (depths.size !== 3) {
+    ok = false;
+    console.log(`✗ ${t}: niet alle diepgangen (luchtig/persoonlijk/diep) aanwezig`);
+  }
+}
+const cardTexts = cardRows.map((m) => m[4].toLowerCase());
+const dupCards = cardTexts.filter((t, i) => cardTexts.indexOf(t) !== i);
+if (dupCards.length) {
+  ok = false;
+  console.log(`✗ dubbele kaarten: ${dupCards.join(' | ')}`);
+} else {
+  console.log(`✓ geen dubbele kaarten, alle diepgangen aanwezig (${cardRows.length} gecontroleerd)`);
+}
+
 const dupes = slugs.filter((s, i) => slugs.indexOf(s) !== i);
 if (dupes.length) {
   ok = false;

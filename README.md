@@ -14,7 +14,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 1 | Inloggen (e-mailcode), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
 | 2 | Streak-weergave, pushmeldingen | ✅ |
 | 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ✅ |
-| 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ⏳ |
+| 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ✅ |
 | 5 | Oefeningen & tips | ⏳ |
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ⏳ |
 | 7 | Afronding: toegankelijkheid, privacy, store-builds | ⏳ |
@@ -94,6 +94,12 @@ npx expo start
 3. Wie als eerste klaar is, ziet *"Wacht op …"*. Zodra jullie allebei klaar zijn, verschijnt de uitslag met jullie scores, overeenkomsten en verschillen.
 4. Na je laatste gok liggen je antwoorden vast.
 
+**Gesprekskaarten testen.**
+- Open **Kaarten** en kies een thema.
+- Filter op diepgang (luchtig, persoonlijk of diep) en swipe door de kaarten, of gebruik Vorige/Volgende.
+- *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
+- **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
+
 **Pushmeldingen testen.**
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.
 - **Android:** Expo Go ondersteunt geen pushmeldingen. Maak daarom een development build met `npx eas-cli build --profile development --platform android`. Dat kan gratis. Installeer de APK en start dan `npx expo start`.
@@ -108,7 +114,7 @@ npx expo start
 npm test                # Jest: datum/tijdzone, codes, foutmeldingen, kleurcontrast (WCAG AA), meldingen
 npm run typecheck       # TypeScript
 npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
-npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen (lokale PostgreSQL + pgTAP, geen Docker nodig)
+npm run test:db         # pgTAP: koppelen, zichtbaarheid, streaks, meldingen, quizzen, kaarten (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
 Voor `npm run test:db` heb je PostgreSQL 15+ en pgTAP nodig, bijvoorbeeld via `apt install postgresql-16 postgresql-16-pgtap`. Draai het als gewone gebruiker, niet als root.
@@ -122,6 +128,7 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Antwoorden zijn definitief.** Je kunt geen antwoorden geven voor een eerdere dag. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
 - **Ontkoppelen wist alles.** Bij ontkoppelen verdwijnt alle gedeelde data voor jullie allebei. *Account verwijderen* wist daarnaast je account.
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
+- **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
 
 ## Content uitbreiden

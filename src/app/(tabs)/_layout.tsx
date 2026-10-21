@@ -56,6 +56,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="kaarten"
+        options={{
+          title: 'Kaarten',
+          tabBarIcon: ({ color, size }) => <Ionicons name="layers-outline" color={color as string} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="archief"
         options={{
           title: 'Archief',

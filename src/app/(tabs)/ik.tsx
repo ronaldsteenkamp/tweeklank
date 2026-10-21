@@ -64,6 +64,44 @@ export default function Ik() {
       setSaved(true);
     });
 
+  const setExplicit = (on: boolean) => {
+    if (!session || !me) return;
+    if (!on) {
+      run('explicit', async () => {
+        await updateProfile(session.user.id, { explicit_opt_in: false });
+        await refresh();
+      });
+      return;
+    }
+    Alert.alert(
+      '18+ gesprekskaarten aanzetten?',
+      `Bevestig dat je 18 jaar of ouder bent. De set wordt pas zichtbaar als ${partnerName} hem ook aanzet. Jullie kunnen hem allebei altijd weer uitzetten.`,
+      [
+        { text: 'Annuleren', style: 'cancel' },
+        {
+          text: 'Ik ben 18+, zet aan',
+          onPress: () =>
+            run('explicit', async () => {
+              await updateProfile(session.user.id, {
+                explicit_opt_in: true,
+                adult_confirmed_at: me.adult_confirmed_at ?? new Date().toISOString(),
+              });
+              await refresh();
+            }),
+        },
+      ],
+    );
+  };
+
+  const explicitStatus = (() => {
+    const mine = !!me?.explicit_opt_in;
+    const theirs = !!partner?.explicit_opt_in;
+    if (mine && theirs) return 'Staat aan voor jullie allebei. Je vindt de set onder Kaarten.';
+    if (mine) return `Wacht op ${partnerName}. Pas als jullie het allebei aanzetten, verschijnt de set.`;
+    if (theirs) return `${partnerName} heeft dit aangezet. Zet het ook aan als je dat wilt.`;
+    return null;
+  })();
+
   const confirmUnlink = () =>
     Alert.alert(
       'Ontkoppelen?',
@@ -184,6 +222,26 @@ export default function Ik() {
         {pushInfo ? (
           <AppText variant="small" muted accessibilityLiveRegion="polite">
             {pushInfo}
+          </AppText>
+        ) : null}
+      </Card>
+
+      <Card>
+        <AppText variant="large">18+ gesprekskaarten</AppText>
+        <AppText variant="small" muted>
+          Een extra set openhartige vragen over seks, fantasieën en grenzen. Alleen zichtbaar als jullie hem allebei
+          aanzetten.
+        </AppText>
+        <NotifySwitch
+          label="Toon de 18+-set"
+          hint="Je bevestigt dat je 18 jaar of ouder bent"
+          value={!!me?.explicit_opt_in}
+          disabled={busy !== null}
+          onChange={setExplicit}
+        />
+        {explicitStatus ? (
+          <AppText variant="small" color={colors.secondary} accessibilityLiveRegion="polite">
+            {explicitStatus}
           </AppText>
         ) : null}
       </Card>
