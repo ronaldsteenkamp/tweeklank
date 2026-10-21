@@ -93,6 +93,8 @@ npm install
 npx expo start
 ```
 
+De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
+
 1. Scan de QR-code met **Expo Go** (iOS: met de camera, Android: in de Expo Go-app).
 2. Tik op **Beginnen**. Je hebt geen e-mail of wachtwoord nodig.
 3. Kies een naam en tik op **Maak een code**.

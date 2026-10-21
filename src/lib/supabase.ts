@@ -3,12 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
 import { secureStorage } from './secureStorage';
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// Standaard het Tweeklank-project. Dit zijn publieke sleutels (bedoeld om in de app mee te leveren);
+// de data wordt beschermd door de RLS-regels in de database. Een eigen project? Zet dan .env (zie .env.example).
+const DEFAULT_URL = 'https://qexufuyxaxvsyaelpfkr.supabase.co';
+const DEFAULT_PUBLISHABLE_KEY = 'sb_publishable_E0id8_XA4R8XnvcOpot5QA_gM82X1oh';
 
-export const isConfigured = Boolean(url && anonKey);
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL || DEFAULT_URL;
+const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_PUBLISHABLE_KEY;
 
-export const supabase = createClient(url ?? 'http://localhost', anonKey ?? 'ontbreekt', {
+export const supabase = createClient(url, anonKey, {
   auth: {
     storage: Platform.OS === 'web' ? undefined : secureStorage,
     autoRefreshToken: true,
