@@ -47,6 +47,15 @@ supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor me
 __tests__/          Jest-tests voor app-logica
 ```
 
+## Huidige installatie
+
+Het project **tweeklank** draait al:
+- **Waar:** organisatie *Tweeslag Wispo*, regio eu-central-1, project-ref `qexufuyxaxvsyaelpfkr`.
+- **Wat erin staat:** alle migraties (inclusief `…_hardening.sql`), de Edge Functions `delete-account` en `send-push`, de trigger en de cron-jobs voor meldingen.
+- **Geheim voor meldingen:** dat is in de database zelf gegenereerd en staat in de Vault als `tweeklank_push_secret`.
+
+> De migraties zijn via de Supabase-connector en de SQL Editor toegepast, met andere namen dan de bestanden in `supabase/migrations/`. Wil je later `npx supabase db push` gebruiken? Draai dan eerst `npx supabase migration repair` (zie de Supabase-documentatie). Je kunt nieuwe migraties ook in de SQL Editor plakken.
+
 ## Supabase opzetten
 
 1. **Project aanmaken.** Maak een gratis project aan op [supabase.com](https://supabase.com). Kies bij voorkeur de regio *Central EU (Frankfurt)*.
