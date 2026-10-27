@@ -67,9 +67,11 @@ describe('contentcheck', () => {
   it('de content in de migraties voldoet aan alle regels', () => {
     const content = parseContent(migrations());
     const daily = Object.values(content.daily_questions);
-    expect(daily.length).toBeGreaterThanOrEqual(120);
+    const regular = daily.filter((q) => q.slug.startsWith('dv-'));
+    expect(regular.length).toBeGreaterThanOrEqual(180);
     expect(nearDuplicates(daily.map((q) => ({ slug: q.slug, text: String(q.text) })))).toEqual([]);
-    expect(depthDistribution(daily.map((q) => Number(q.depth))).ok).toBe(true);
+    expect(depthDistribution(regular.map((q) => Number(q.depth))).ok).toBe(true);
+    expect(Object.keys(content.question_series)).toHaveLength(6);
     const sources = Object.values(content.exercises).map((e) => String(e.source));
     expect(sources).toHaveLength(12);
     for (const src of sources) expect(src).toMatch(/^Geïnspireerd op .+/);

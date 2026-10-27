@@ -21,6 +21,11 @@ export type TodayQuestion = {
   streak: number;
   /** dag waarop jullie deze vraag de vorige keer kregen, of null */
   repeat_of: string | null;
+  /** themaweek: titel, intro, stap 1–7 en de afsluitende oefening (anders null) */
+  series_title: string | null;
+  series_intro: string | null;
+  series_step: number | null;
+  series_exercise_slug: string | null;
 };
 
 export type Reaction = {

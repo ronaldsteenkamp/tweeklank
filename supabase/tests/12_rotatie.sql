@@ -18,7 +18,7 @@ create function pg_temp.pick(p_today date) returns int language sql as $$
 $$;
 create function pg_temp.assign(p_day date, p_pos int) returns void language sql as $$
   insert into public.couple_daily (couple_id, day, question_id)
-  values ((select id from c), p_day, (select id from public.daily_questions where position = p_pos));
+  values ((select id from c), p_day, (select id from public.daily_questions where position = p_pos and series_id is null));
 $$;
 
 select is(pg_temp.pick('2026-01-10'), 1, 'een nieuw koppel begint bij de eerste vraag');
@@ -32,7 +32,7 @@ select is((select repeat_of from public.pick_regular_question((select id from c)
 delete from public.couple_daily;
 insert into public.couple_daily (couple_id, day, question_id)
   select (select id from c), '2025-01-01'::date + q.position, q.id
-  from public.daily_questions q;
+  from public.daily_questions q where q.series_id is null;
 select is(pg_temp.pick('2026-06-01'), 1, 'alle vragen gebruikt: de vraag die het langst geleden is gesteld komt terug');
 select is((select repeat_of from public.pick_regular_question((select id from c), '2026-06-01')), '2025-01-02'::date,
   'repeat_of wijst naar de vorige keer');
@@ -44,7 +44,7 @@ select is(pg_temp.pick('2026-06-01'), 2, 'de laatste keer telt: een recent herha
 delete from public.couple_daily;
 insert into public.couple_daily (couple_id, day, question_id)
   select (select id from c), public.ams_today() - 400 + q.position, q.id
-  from public.daily_questions q;
+  from public.daily_questions q where q.series_id is null;
 insert into public.daily_answers (couple_id, day, user_id, body) values
   ((select id from c), public.ams_today() - 399, '11111111-1111-1111-1111-111111111111', 'A toen'),
   ((select id from c), public.ams_today() - 399, '22222222-2222-2222-2222-222222222222', 'B toen');

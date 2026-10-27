@@ -15,6 +15,8 @@ const MESSAGES: Record<string, string> = {
   ongeldig_weekdoel: 'Kies een weekdoel van 3 tot en met 7 samen-dagen.',
   ongeldige_pauze: 'Kies een pauze van 1, 2 of 4 weken, of tot jullie hem uitzetten.',
   al_gepauzeerd: 'Jullie ritme staat al op pauze.',
+  serie_al_bezig: 'Jullie zijn al met een themaweek bezig.',
+  serie_niet_beschikbaar: 'Deze themaweek is niet (meer) beschikbaar.',
   geen_vragen: 'Er zijn nog geen vragen geladen. Controleer de database-migraties.',
 };
 

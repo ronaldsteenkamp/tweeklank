@@ -6,6 +6,7 @@ import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
 import type { WeekStatus } from './rhythm';
+import type { SeriesOffer } from './series';
 import type { YearAgoAnswer } from './yearAgo';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
@@ -97,6 +98,21 @@ export async function fetchYesterday(): Promise<YesterdayQuestion | null> {
 /** De antwoorden van de vorige keer bij een terugkerende vraag (alleen na je eigen nieuwe antwoord). */
 export async function fetchYearAgo(day: string): Promise<YearAgoAnswer[]> {
   return unwrap(await supabase.rpc('get_year_ago', { p_day: day })) as YearAgoAnswer[];
+}
+
+// ---- Themaweken ----
+
+export async function fetchSeriesOffer(): Promise<SeriesOffer[]> {
+  return unwrap(await supabase.rpc('get_series_offer')) as SeriesOffer[];
+}
+
+/** Geeft 'gestart' als jullie allebei deze serie kozen, anders 'wacht'. */
+export async function chooseSeries(seriesId: number): Promise<'gestart' | 'wacht'> {
+  return unwrap(await supabase.rpc('choose_series', { p_series: seriesId })) as 'gestart' | 'wacht';
+}
+
+export async function dismissSeriesOffer(): Promise<void> {
+  unwrap(await supabase.rpc('dismiss_series_offer', { p_snooze: true }));
 }
 
 // ---- Weekritme ----

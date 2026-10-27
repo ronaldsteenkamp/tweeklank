@@ -137,14 +137,28 @@ if (uiHits.length) {
 }
 
 // (Bijna) dubbele dagvragen, ook tegen de bestaande
-const daily = Object.values(content.daily_questions ?? {}).sort((a, b) => a.position - b.position);
-const near = rules.nearDuplicates(daily.map((q) => ({ slug: q.slug, text: q.text })));
+const allDaily = Object.values(content.daily_questions ?? {}).sort((a, b) => a.position - b.position);
+// gewone dagvragen (dv-…); de vragen van themaweken (tw-…) tellen niet mee voor de diepgangsverdeling
+const daily = allDaily.filter((q) => q.slug.startsWith('dv-'));
+const near = rules.nearDuplicates(allDaily.map((q) => ({ slug: q.slug, text: q.text })));
 if (near.length) {
   ok = false;
   console.log(`✗ dagvragen die (bijna) hetzelfde zijn:\n  ${near.map(([a, b, s]) => `${a} ~ ${b} (${s})`).join('\n  ')}`);
 } else {
-  console.log(`✓ geen (bijna) dubbele dagvragen (${daily.length} gecontroleerd)`);
+  console.log(`✓ geen (bijna) dubbele dagvragen (${allDaily.length} gecontroleerd, inclusief themaweken)`);
 }
+
+// Themaweken: elke serie precies 7 vragen (stap 1 t/m 7), een intro en een afsluitende oefening
+const seriesList = Object.values(content.question_series ?? {});
+const badSeries = seriesList.filter((ser) => {
+  const steps = allDaily.filter((q) => q.series_slug === ser.slug).map((q) => q.step).sort((a, b) => a - b);
+  return steps.join(',') !== '1,2,3,4,5,6,7' || !ser.intro || !content.exercises?.[ser.exercise_slug];
+});
+const seriesPass = seriesList.length >= 6 && badSeries.length === 0;
+ok &&= seriesPass;
+console.log(
+  `${seriesPass ? '✓' : '✗'} themaweken: ${seriesList.length} (minimaal 6)${badSeries.length ? `, niet in orde: ${badSeries.map((x) => x.slug).join(', ')}` : ', elk 7 vragen met intro en oefening'}`,
+);
 
 // Oefeningen: elke oefening een eerlijke onderbouwing, nooit "bewezen"
 const exercises = Object.values(content.exercises ?? {});

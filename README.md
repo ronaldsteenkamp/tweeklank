@@ -28,6 +28,7 @@ Alles is zelf geschreven, in het Nederlands.
 | Onderdeel | Aantal |
 |---|---|
 | Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
+| Themaweken | 6 series × 7 vragen, elk met intro en afsluitende oefening |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
 | Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
@@ -141,6 +142,12 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Bij een terugkerende vraag verschijnt na je eigen antwoord een ingeklapte kaart *"Een jaar geleden schreef je…"*. Daarin staat je antwoord van toen, en dat van je partner als je die dag zelf ook had geantwoord.
 - Uitzetten kan per persoon onder **Ik → Een jaar geleden**.
 - Snel proberen zonder een jaar te wachten: zie `supabase/tests/12_rotatie.sql`.
+
+**Themaweken testen.**
+- Na de eerste 60 gewone vragen verschijnt op **Vandaag**, nadat je zelf hebt geantwoord, de kaart *Zin in een themaweek?*. Er zijn zes series: *Hoe wij ruzie maken*, *Geld en wij*, *Waar we vandaan komen*, *Kleine momenten*, *Op afstand* en *Ons soort gezin*.
+- Wie eerst kiest, ziet *"Wacht op …"*. Kiezen jullie allebei dezelfde, dan begint de serie de volgende dag: zeven vragen met *"dag 3 van 7"*, en op dag 7 een oefening om af te sluiten. Daarna gaan de gewone vragen verder waar ze waren.
+- *Nu niet* verbergt het aanbod twee weken, alleen voor jou.
+- Zonder 60 dagen te wachten: zie `supabase/tests/13_themaweken.sql`.
 
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
