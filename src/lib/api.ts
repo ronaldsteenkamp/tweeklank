@@ -84,6 +84,15 @@ export async function redeemTransferCode(code: string): Promise<void> {
   if (verifyError) throw verifyError;
 }
 
+/** Herstelcode van 16 tekens om te bewaren; een eerdere vervalt. */
+export async function createRecoveryCode(): Promise<string> {
+  return unwrap(await supabase.rpc('create_recovery_code')) as string;
+}
+
+export async function hasRecoveryCode(): Promise<boolean> {
+  return !!unwrap(await supabase.rpc('has_recovery_code'));
+}
+
 // ---- Dagelijkse vraag ----
 
 export async function fetchToday(): Promise<TodayQuestion> {

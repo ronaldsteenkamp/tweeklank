@@ -161,6 +161,12 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Gaf een van jullie twee maanden op rij een 1 of 2, dan staat er bij die vraag alleen *"Wil je hier meer over praten? Deze oefeningen kunnen helpen"*, met oefeningen en de hulppagina. Er gaat geen melding uit en er staat niet bij wie.
 - Zonder op de 1e te wachten: zie `supabase/tests/16_checkin.sql`.
 
+**Herstel en export testen.**
+- Een account zonder e-mail ziet na zeven dagen één keer de kaart *Bewaar een manier om terug te komen*. Daarna staat hij alleen nog onder **Ik**.
+- *E-mail koppelen* stuurt een bevestigingslink (`supabase.auth.updateUser`). Daarvoor is een eigen SMTP-server nodig, zie stap 7 van *Supabase opzetten*.
+- *Herstelcode maken* geeft een code van 16 tekens die lang geldig is en één keer werkt. Een overzetcode is maar 15 minuten geldig en dus niet om te bewaren. Je gebruikt de herstelcode op een nieuwe telefoon via *Ik heb een overzetcode*.
+- **Ik → Jullie gegevens downloaden** maakt een JSON-bestand of een leesbare HTML-pagina op het toestel en opent het deelmenu (in de browser: een download). Je partner staat er alleen in voor dagen waarop jullie allebei hebben geantwoord.
+
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
 - Tik op *Nu beantwoorden*. Het antwoord van je partner op gisteren zie je pas als je zelf hebt geantwoord, net als bij vandaag.
@@ -214,7 +220,8 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
 - **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
-- **Overzetcodes.** Een overzetcode is 15 minuten en één keer geldig. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
+- **Overzetcodes en herstelcodes.** Een overzetcode is 15 minuten en één keer geldig. Een herstelcode heeft 16 tekens, is lang geldig en werkt één keer. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
+- **Export op het toestel.** De export (JSON of HTML) wordt op de telefoon gemaakt en via het deelmenu gedeeld. Er blijft geen kopie op een server.
 
 ## Hulppagina "Als het niet goed gaat"
 

@@ -36,11 +36,11 @@ export default function Overzetcode() {
         <AppText variant="title">Account overzetten</AppText>
         <AppText muted>
           Open Tweeklank op je oude telefoon en ga naar Ik → Naar een nieuwe telefoon. Daar maak je een code die 15
-          minuten geldig is.
+          minuten geldig is. Heb je een herstelcode van 16 tekens bewaard? Die kun je hier ook invullen.
         </AppText>
         <Card>
           <Field
-            label="Overzetcode"
+            label="Overzetcode of herstelcode"
             value={input}
             onChangeText={setInput}
             autoCapitalize="characters"

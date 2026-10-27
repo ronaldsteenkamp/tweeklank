@@ -2,10 +2,14 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
 import { HelpLink } from '@/components/HelpLink';
+import { RecoveryCard } from '@/components/RecoveryCard';
 import { AppText, Button, Card, Chip, ErrorText, Field, Row, Screen } from '@/components/ui';
-import { deleteAccount, fetchWeek, leaveCouple, setWeekGoal, startPause, stopPause, updateProfile } from '@/lib/api';
+import { deleteAccount, fetchArchive, fetchImportantDates, fetchPlans, fetchWeek, leaveCouple, setWeekGoal, startPause, stopPause, updateProfile } from '@/lib/api';
 import { confirmSignOut, signOut } from '@/lib/auth';
+import { amsterdamDay } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
+import { buildExport, exportFileName, exportHtml } from '@/lib/export';
+import { shareExportFile } from '@/lib/exportFile';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
 import { hourLabel, shiftHour } from '@/lib/nudge';
@@ -138,6 +142,16 @@ export default function Ik() {
     run('pause', async () => {
       await stopPause();
       loadWeek();
+    });
+
+  const exportData = (format: 'json' | 'html') =>
+    run(`export-${format}`, async () => {
+      if (!me) return;
+      const [archive, plans, dates] = await Promise.all([fetchArchive(), fetchPlans(), fetchImportantDates()]);
+      const data = buildExport({ meId: me.id, myName: me.display_name, partnerName: partner?.display_name ?? null, archive, plans, dates });
+      const name = exportFileName(format, amsterdamDay());
+      if (format === 'json') await shareExportFile(name, JSON.stringify(data, null, 2), 'application/json');
+      else await shareExportFile(name, exportHtml(data), 'text/html');
     });
 
   const confirmUnlink = () =>
@@ -382,6 +396,8 @@ export default function Ik() {
         <Button kind="danger" label="Ontkoppelen" onPress={confirmUnlink} busy={busy === 'unlink'} />
       </Card>
 
+      {phoneOnly && <RecoveryCard />}
+
       <Card>
         <AppText variant="large">Nieuwe telefoon?</AppText>
         <AppText muted>
@@ -390,6 +406,16 @@ export default function Ik() {
             : 'Op een nieuwe telefoon log je in met je e-mailadres, of je gebruikt een overzetcode.'}
         </AppText>
         <Button kind="secondary" label="Naar een nieuwe telefoon" onPress={() => router.push('/overzetten')} />
+      </Card>
+
+      <Card>
+        <AppText variant="large">Jullie gegevens downloaden</AppText>
+        <AppText variant="small" muted>
+          Je eigen antwoorden, die van {partnerName} op dagen dat jullie allebei antwoordden, en de reacties, plannen en
+          datums. Het bestand wordt op je telefoon gemaakt en niet op een server bewaard.
+        </AppText>
+        <Button kind="secondary" label="Download als JSON" onPress={() => exportData('json')} busy={busy === 'export-json'} />
+        <Button kind="secondary" label="Download als leesbare pagina" onPress={() => exportData('html')} busy={busy === 'export-html'} />
       </Card>
 
       <Card>

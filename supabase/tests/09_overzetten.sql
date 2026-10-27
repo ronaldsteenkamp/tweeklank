@@ -1,6 +1,6 @@
 -- Tests: account overzetten naar een nieuwe telefoon
 begin;
-select plan(12);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', null),
@@ -43,6 +43,23 @@ insert into public.transfer_codes (code_hash, user_id, expires_at)
 values (public.transfer_code_hash('OUDCODE2'), '22222222-2222-2222-2222-222222222222', now() - interval '1 minute');
 set local role service_role;
 select throws_ok($$ select public.claim_transfer_code('OUDCODE2') $$, 'P0001', 'code_onbekend', 'verlopen code werkt niet');
+reset role;
+
+-- Herstelcode: 16 tekens, lang geldig, één keer te gebruiken, los van de overzetcode
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222"}', true);
+set local role authenticated;
+select is(public.has_recovery_code(), false, 'nog geen herstelcode');
+create temp table rc as select public.create_recovery_code() as code;
+grant select on rc to service_role;
+select ok((select code from rc) ~ '^[A-HJ-NP-Z2-9]{16}$', 'herstelcode heeft 16 tekens zonder verwarrende letters');
+select * from public.create_transfer_code();
+select is(public.has_recovery_code(), true, 'een nieuwe overzetcode laat de herstelcode staan');
+select is((select recovery_card_seen from public.profiles where id = auth.uid()), true, 'de herinneringskaart hoeft niet meer');
+reset role;
+set local role service_role;
+select is(public.claim_transfer_code((select code from rc)), '22222222-2222-2222-2222-222222222222'::uuid, 'herstelcode geeft het juiste account');
+select throws_ok(format('select public.claim_transfer_code(%L)', (select code from rc)), 'P0001', 'code_onbekend',
+  'een herstelcode werkt maar één keer');
 reset role;
 
 select * from finish();

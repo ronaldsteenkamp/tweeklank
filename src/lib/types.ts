@@ -10,6 +10,7 @@ export type Profile = {
   show_year_ago: boolean;
   notify_nudges: boolean;
   notify_hour: number;
+  recovery_card_seen: boolean;
 };
 
 export type TodayQuestion = {

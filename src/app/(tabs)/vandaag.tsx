@@ -4,18 +4,21 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
 import { NudgeButton } from '@/components/NudgeButton';
+import { RecoveryCard } from '@/components/RecoveryCard';
 import { SeriesOfferCard } from '@/components/SeriesOfferCard';
 import { SoloCard } from '@/components/SoloCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { dismissSoloCard, fetchAnswers, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
+import { dismissSoloCard, fetchAnswers, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer, updateProfile } from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
 import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhythm';
+import { showRecoveryCard } from '@/lib/recovery';
 import { isSeriesFinale, seriesLabel, type SeriesOffer } from '@/lib/series';
 import { useSession } from '@/lib/session';
+import { isPhoneOnlyAccount } from '@/lib/transfer';
 import type { Answer, TodayQuestion } from '@/lib/types';
 import { useCoupleRealtime } from '@/lib/useCoupleRealtime';
 import type { YearAgoAnswer } from '@/lib/yearAgo';
@@ -24,7 +27,7 @@ import { spacing } from '@/theme/tokens';
 
 export default function Vandaag() {
   const { colors } = useTheme();
-  const { me, partner, coupleId, refresh } = useSession();
+  const { session, me, partner, coupleId, refresh } = useSession();
   const [today, setToday] = useState<TodayQuestion | null>(null);
   const [week, setWeek] = useState<WeekStatus | null>(null);
   const [yesterday, setYesterday] = useState<YesterdayQuestion | null>(null);
@@ -137,6 +140,15 @@ export default function Vandaag() {
           />
         </View>
 
+        {me && showRecoveryCard({ phoneOnly: isPhoneOnlyAccount(session?.user), createdAt: session?.user.created_at, seen: me.recovery_card_seen }) && (
+          <RecoveryCard
+            onLater={() => {
+              updateProfile(me.id, { recovery_card_seen: true })
+                .then(refresh)
+                .catch(() => {});
+            }}
+          />
+        )}
         {checkinOpen && (
           <Card>
             <AppText variant="large">Hoe gaat het met ons?</AppText>

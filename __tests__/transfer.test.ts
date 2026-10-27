@@ -17,6 +17,12 @@ describe('overzetcodes', () => {
   it('toont de code in twee blokjes', () => {
     expect(formatTransferCode('abcdef23')).toBe('ABCD EF23');
   });
+
+  it('accepteert ook een herstelcode van 16 tekens', () => {
+    expect(isValidTransferCode('abcd-ef23 ghjk mnpq')).toBe(true);
+    expect(isValidTransferCode('ABCDEF23GHJKMNP')).toBe(false);
+    expect(formatTransferCode('abcdef23ghjkmnpq')).toBe('ABCD EF23 GHJK MNPQ');
+  });
 });
 
 describe('account alleen op de telefoon', () => {
