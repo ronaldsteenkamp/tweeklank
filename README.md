@@ -2,6 +2,8 @@
 
 Een **volledig gratis** relatie-app voor koppels. Er is geen abonnement, geen premium-laag, geen in-app aankoop en geen advertentie. Ook tracking of analytics van derden zit er niet in.
 
+> **Onze belofte:** Tweeklank blijft gratis. Bestaande functies komen nooit achter een betaalmuur.
+
 Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het antwoord van je partner zie je pas als je zelf hebt geantwoord.
 
 ## Status
@@ -17,6 +19,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ✅ |
 | 7 | Afronding: toegankelijkheid, lint, privacy, store-voorbereiding | ✅ |
 | 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
+| 9 | Quick wins: 60 extra dagvragen, strengere contentcheck, weekritme met pauze, gisteren inhalen, hulppagina, inclusieve teksten, onderbouwing bij oefeningen, kaarten schudden | ✅ |
 
 ## Startcontent
 
@@ -223,7 +226,12 @@ De app gebruikt alleen gratis diensten: Supabase free tier, Expo/EAS free tier e
    - **Leeftijdsclassificatie:** door de optionele 18+-kaarten is 17+ (App Store) of *Mature/18+* (Play Store) het verstandigst. Vermeld dat de 18+-content standaard uit staat.
    - **Privacylabels:** er is geen tracking. De app verzamelt een naam en door de gebruiker gemaakte content (antwoorden, plannen), en alleen als iemand daarvoor kiest een e-mailadres. Alles uitsluitend voor de werking van de app en niet gekoppeld aan advertenties.
    - **Account verwijderen in de app:** dat is verplicht voor beide stores en zit al in de app, onder *Ik → Account verwijderen*.
-6. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Die staat klaar in `docs/index.html`, met dezelfde tekst als in de app.
+6. **Concepttekst voor de store.**
+   > **Tweeklank: elke dag een vraag, samen.**
+   > Beantwoord elke dag dezelfde vraag als je partner. Je ziet het antwoord van de ander pas als je zelf hebt geantwoord. Met gesprekskaarten, quizzen, korte oefeningen en een gedeelde lijst met plannen. Ook fijn als jullie op afstand wonen.
+   >
+   > Tweeklank blijft gratis. Bestaande functies komen nooit achter een betaalmuur. Geen abonnement, geen advertenties en geen tracking. Jullie antwoorden zijn alleen voor jullie twee.
+7. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Die staat klaar in `docs/index.html`, met dezelfde tekst als in de app.
    - Zet hem online via GitHub: *Settings → Pages → Build and deployment → Deploy from a branch*, kies `main` en de map `/docs`.
    - De URL wordt dan `https://ronaldsteenkamp.github.io/tweeklank/`.
    - Pas je de tekst in `src/app/privacy.tsx` aan? Draai dan `node scripts/make-privacy-page.mjs`.
