@@ -21,6 +21,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
 | 9 | Quick wins: 60 extra dagvragen, strengere contentcheck, weekritme met pauze, gisteren inhalen, hulppagina, inclusieve teksten, onderbouwing bij oefeningen, kaarten schudden | ✅ |
 | 10 | Volgend kwartaal: slimme rotatie en "Een jaar geleden", 180 dagvragen, themaweken, "Ik denk aan je" en eigen meldtijd, solo-kaart, maandelijkse check-in, herstelcode en export, op afstand | ✅ |
+| 11 | Later: thuisschermwidget, Ons jaar, samen kaarten spelen, seizoensdates, 365 dagvragen | ✅ |
 
 ## Startcontent
 
@@ -43,12 +44,14 @@ Alles is zelf geschreven, in het Nederlands.
 
 ```
 src/app/            schermen (expo-router)
+src/widgets/        thuisschermwidget (expo-widgets, alleen in development- en store-builds)
 src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
 supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen,
-                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand)
+                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand, seizoenen,
+                    samen spelen, ons jaar)
 supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
