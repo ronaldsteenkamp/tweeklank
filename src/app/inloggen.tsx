@@ -65,8 +65,9 @@ export default function Inloggen() {
           </AppText>
           <Button label="Beginnen" onPress={start} busy={busy === 'start'} disabled={busy !== null} />
           <AppText variant="small" muted>
-            Je account staat op deze telefoon. Verwijder je de app of raak je je telefoon kwijt, dan begin je opnieuw.
+            Je account staat op deze telefoon. Nieuwe telefoon? Neem je account mee met een overzetcode. Kwijt of de app verwijderd zonder code, dan begin je opnieuw.
           </AppText>
+          <Button kind="ghost" label="Ik heb een overzetcode" onPress={() => router.push('/overzetcode')} disabled={busy !== null} />
           <ErrorText message={error} />
 
           {showEmail ? (

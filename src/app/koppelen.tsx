@@ -10,6 +10,7 @@ import { extractInviteCode, formatInviteCode, inviteShareMessage, isValidInviteC
 import { takePendingInvite } from '@/lib/pendingInvite';
 import { useSession } from '@/lib/session';
 import { confirmSignOut } from '@/lib/auth';
+import { isPhoneOnlyAccount } from '@/lib/transfer';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
@@ -140,7 +141,7 @@ export default function Koppelen() {
       </Card>
 
       <ErrorText message={error} />
-      <Button kind="ghost" label="Uitloggen" onPress={() => confirmSignOut(!!session?.user.is_anonymous, () => router.replace('/'))} />
+      <Button kind="ghost" label="Uitloggen" onPress={() => confirmSignOut(isPhoneOnlyAccount(session?.user), () => router.replace('/'))} />
     </Screen>
   );
 }

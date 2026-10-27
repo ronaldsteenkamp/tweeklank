@@ -1,3 +1,4 @@
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
@@ -53,6 +54,28 @@ export async function leaveCouple(): Promise<void> {
 export async function deleteAccount(): Promise<void> {
   const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
   if (error) throw error;
+}
+
+// ---- Overzetten naar een nieuwe telefoon ----
+
+export async function createTransferCode(): Promise<{ code: string; expires_at: string }> {
+  const rows = unwrap(await supabase.rpc('create_transfer_code')) as { code: string; expires_at: string }[];
+  return rows[0];
+}
+
+/** Op de nieuwe telefoon: wisselt de code in en logt in op hetzelfde account. */
+export async function redeemTransferCode(code: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ token_hash?: string }>('transfer-account', {
+    method: 'POST',
+    body: { code },
+  });
+  if (error) {
+    if (error instanceof FunctionsHttpError && error.context?.status === 400) throw new Error('overzetcode_onbekend');
+    throw error;
+  }
+  if (!data?.token_hash) throw new Error('overzetcode_onbekend');
+  const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+  if (verifyError) throw verifyError;
 }
 
 // ---- Dagelijkse vraag ----

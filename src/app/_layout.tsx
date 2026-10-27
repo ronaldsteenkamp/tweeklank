@@ -33,6 +33,8 @@ function ThemedStack() {
         <Stack.Screen name="plannen" options={{ headerShown: true, title: 'Onze plannen', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="datums" options={{ headerShown: true, title: 'Belangrijke datums', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="auth-callback" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="overzetten" options={{ headerShown: true, title: 'Overzetten', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="overzetcode" options={{ headerShown: true, title: 'Overzetten', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy', headerBackTitle: 'Terug' }} />
       </Stack>
     </>

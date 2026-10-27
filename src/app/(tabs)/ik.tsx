@@ -7,6 +7,7 @@ import { confirmSignOut, signOut } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
+import { isPhoneOnlyAccount } from '@/lib/transfer';
 import { useTheme, type ThemePref } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -27,6 +28,7 @@ export default function Ik() {
   const [pushInfo, setPushInfo] = useState<string | null>(null);
 
   const partnerName = partner?.display_name || 'je partner';
+  const phoneOnly = isPhoneOnlyAccount(session?.user);
 
   const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates', value: boolean) =>
     run(key, async () => {
@@ -148,7 +150,7 @@ export default function Ik() {
       <Card>
         <AppText variant="large">Profiel</AppText>
         <AppText variant="small" muted>
-          {session?.user.email ?? 'Account zonder e-mail, alleen op deze telefoon.'}
+          {phoneOnly ? 'Account zonder e-mail, alleen op deze telefoon.' : session?.user.email}
         </AppText>
         <Field
           label="Naam die je partner ziet"
@@ -260,6 +262,16 @@ export default function Ik() {
       </Card>
 
       <Card>
+        <AppText variant="large">Nieuwe telefoon?</AppText>
+        <AppText muted>
+          {phoneOnly
+            ? 'Je account staat alleen op deze telefoon. Neem het mee met een overzetcode, met je koppeling en al jullie antwoorden.'
+            : 'Op een nieuwe telefoon log je in met je e-mailadres, of je gebruikt een overzetcode.'}
+        </AppText>
+        <Button kind="secondary" label="Naar een nieuwe telefoon" onPress={() => router.push('/overzetten')} />
+      </Card>
+
+      <Card>
         <AppText variant="large">Privacy</AppText>
         <AppText muted>Jullie antwoorden zijn alleen voor jullie twee. Geen advertenties, geen tracking.</AppText>
         <Button kind="ghost" label="Lees hoe we met je gegevens omgaan" onPress={() => router.push('/privacy')} />
@@ -268,7 +280,7 @@ export default function Ik() {
       <ErrorText message={error} />
 
       <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-        <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(!!session?.user.is_anonymous, () => router.replace('/'))} />
+        <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(phoneOnly, () => router.replace('/'))} />
         <Button kind="danger" label="Account verwijderen" onPress={confirmDelete} busy={busy === 'delete'} />
       </View>
     </Screen>

@@ -4,6 +4,7 @@ describe('friendlyError', () => {
   it('vertaalt foutcodes uit de database', () => {
     expect(friendlyError({ message: 'code_verlopen' })).toMatch(/verlopen/);
     expect(friendlyError(new Error('eigen_code'))).toMatch(/eigen code/);
+    expect(friendlyError(new Error('overzetcode_onbekend'))).toMatch(/oude telefoon/);
   });
 
   it('valt terug op een algemene melding', () => {
