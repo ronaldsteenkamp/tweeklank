@@ -6,6 +6,7 @@ import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
 import type { WeekStatus } from './rhythm';
+import type { YearAgoAnswer } from './yearAgo';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
 function unwrap<T>({ data, error }: { data: T | null; error: unknown }): T {
@@ -91,6 +92,11 @@ export async function fetchToday(): Promise<TodayQuestion> {
 export async function fetchYesterday(): Promise<YesterdayQuestion | null> {
   const rows = unwrap(await supabase.rpc('get_yesterday_question')) as YesterdayQuestion[];
   return rows[0] ?? null;
+}
+
+/** De antwoorden van de vorige keer bij een terugkerende vraag (alleen na je eigen nieuwe antwoord). */
+export async function fetchYearAgo(day: string): Promise<YearAgoAnswer[]> {
+  return unwrap(await supabase.rpc('get_year_ago', { p_day: day })) as YearAgoAnswer[];
 }
 
 // ---- Weekritme ----

@@ -121,15 +121,15 @@ select throws_ok($$ select public.couple_streak_at('aaaaaaaa-0000-0000-0000-0000
   '42501', null, 'couple_streak_at is niet publiek');
 reset role;
 
--- Rouleren: na alle vragen begint de reeks opnieuw bij de eerste
+-- Rouleren: vragen die het koppel nog niet had, gaan voor
 delete from public.couple_daily where couple_id = 'aaaaaaaa-0000-0000-0000-00000000000a';
 insert into public.couple_daily (couple_id, day, question_id)
   select 'aaaaaaaa-0000-0000-0000-00000000000a', public.ams_today() - g, (select min(id) from public.daily_questions)
   from generate_series(1, (select count(*)::int from public.daily_questions)) g;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 set local role authenticated;
-select is((select q.position from public.get_today_question() t join public.daily_questions q on q.id = t.question_id), 1,
-  'na de laatste vraag begint de rij weer bij vraag 1');
+select is((select q.position from public.get_today_question() t join public.daily_questions q on q.id = t.question_id), 2,
+  'vraag 1 kwam al vaak, dus de eerste nieuwe vraag gaat voor (zie ook 12_rotatie.sql)');
 -- Ontkoppelen wist ook weekdoelen en pauzes
 select public.leave_couple();
 reset role;

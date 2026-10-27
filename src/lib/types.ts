@@ -7,6 +7,7 @@ export type Profile = {
   notify_dates: boolean;
   explicit_opt_in: boolean;
   adult_confirmed_at: string | null;
+  show_year_ago: boolean;
 };
 
 export type TodayQuestion = {
@@ -18,6 +19,8 @@ export type TodayQuestion = {
   partner_answered: boolean;
   /** reeks in weken (zie src/lib/rhythm.ts) */
   streak: number;
+  /** dag waarop jullie deze vraag de vorige keer kregen, of null */
+  repeat_of: string | null;
 };
 
 export type Reaction = {

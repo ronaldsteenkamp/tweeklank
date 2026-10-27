@@ -27,7 +27,7 @@ Alles is zelf geschreven, in het Nederlands.
 
 | Onderdeel | Aantal |
 |---|---|
-| Dagelijkse vragen | 120 (45% luchtig, 35% persoonlijk, 20% diep) |
+| Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
 | Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
@@ -135,6 +135,12 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
 - Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
+
+**Rotatie en "Een jaar geleden" testen.**
+- Een koppel krijgt eerst alle vragen die het nog niet had, op volgorde. Pas daarna komen vragen terug: de vraag die het langst geleden is gesteld.
+- Bij een terugkerende vraag verschijnt na je eigen antwoord een ingeklapte kaart *"Een jaar geleden schreef je…"*. Daarin staat je antwoord van toen, en dat van je partner als je die dag zelf ook had geantwoord.
+- Uitzetten kan per persoon onder **Ik → Een jaar geleden**.
+- Snel proberen zonder een jaar te wachten: zie `supabase/tests/12_rotatie.sql`.
 
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.

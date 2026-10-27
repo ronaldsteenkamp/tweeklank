@@ -3,9 +3,10 @@ import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
+import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { fetchAnswers, fetchToday, fetchWeek, fetchYesterday, saveAnswer } from '@/lib/api';
+import { fetchAnswers, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
@@ -13,6 +14,7 @@ import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhyth
 import { useSession } from '@/lib/session';
 import type { Answer, TodayQuestion } from '@/lib/types';
 import { useCoupleRealtime } from '@/lib/useCoupleRealtime';
+import type { YearAgoAnswer } from '@/lib/yearAgo';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
@@ -23,6 +25,7 @@ export default function Vandaag() {
   const [week, setWeek] = useState<WeekStatus | null>(null);
   const [yesterday, setYesterday] = useState<YesterdayQuestion | null>(null);
   const [yesterdayAnswers, setYesterdayAnswers] = useState<Answer[]>([]);
+  const [yearAgo, setYearAgo] = useState<YearAgoAnswer[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -44,6 +47,7 @@ export default function Vandaag() {
       setWeek(w);
       setYesterday(y);
       setYesterdayAnswers(y && yesterdayView(y) === 'ingehaald' ? await fetchAnswers(y.day) : []);
+      setYearAgo(q.repeat_of && q.answered ? await fetchYearAgo(q.day).catch(() => []) : []);
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
@@ -174,6 +178,7 @@ export default function Vandaag() {
             }}
           />
         )}
+        {!showForm && yearAgo.length > 0 && <YearAgo answers={yearAgo} today={today.day} partnerName={partnerName} />}
         <ErrorText message={error} />
       </ScrollView>
     </SafeAreaView>

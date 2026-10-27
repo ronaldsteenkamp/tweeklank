@@ -312,6 +312,23 @@ export default function Ik() {
       )}
 
       <Card>
+        <AppText variant="large">Een jaar geleden</AppText>
+        <NotifySwitch
+          label="Toon mijn antwoord van de vorige keer"
+          hint="Bij een vraag die terugkomt, na je nieuwe antwoord"
+          value={!!me?.show_year_ago}
+          disabled={busy !== null}
+          onChange={(v) =>
+            run('yearago', async () => {
+              if (!session) return;
+              await updateProfile(session.user.id, { show_year_ago: v });
+              await refresh();
+            })
+          }
+        />
+      </Card>
+
+      <Card>
         <AppText variant="large">18+ gesprekskaarten</AppText>
         <AppText variant="small" muted>
           Een extra set openhartige vragen over seks, fantasieën en grenzen. Alleen zichtbaar als jullie hem allebei
