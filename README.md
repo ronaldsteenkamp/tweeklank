@@ -42,7 +42,7 @@ src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
-supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, streaks, meldingen, quiz, kaarten, oefeningen, samen)
+supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen, content)
 supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
@@ -131,6 +131,13 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
 - Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
+
+**Weekritme testen.**
+- Een *samen-dag* is een dag waarop jullie allebei de dagvraag beantwoorden. Op **Vandaag** zie je bijvoorbeeld *"4 van 5 samen-dagen deze week"* en *"12 weken op rij"*.
+- Een week loopt van zondag tot en met zaterdag (Amsterdamse tijd). De lopende week telt mee zodra het doel gehaald is. Tot die tijd onderbreekt hij niets.
+- Kies onder **Ik → Ons weekritme** een weekdoel van 3 tot en met 7 (standaard 5). Een nieuw doel geldt vanaf deze week, eerdere weken houden hun doel.
+- Zet daar ook een **pauze** aan: 1, 2 of 4 weken, of tot jullie hem uitzetten. Een gepauzeerde week telt niet mee en onderbreekt de reeks niet. Jullie kunnen hem allebei aan- en uitzetten.
+- In de eerste week telt het doel hoogstens het aantal dagen dat er nog over was. Bestaande koppels behouden zo hun voortgang.
 
 **Pushmeldingen testen.**
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.

@@ -4,6 +4,7 @@ import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
+import type { WeekStatus } from './rhythm';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
 function unwrap<T>({ data, error }: { data: T | null; error: unknown }): T {
@@ -83,6 +84,26 @@ export async function redeemTransferCode(code: string): Promise<void> {
 export async function fetchToday(): Promise<TodayQuestion> {
   const rows = unwrap(await supabase.rpc('get_today_question')) as TodayQuestion[];
   return rows[0];
+}
+
+// ---- Weekritme ----
+
+export async function fetchWeek(): Promise<WeekStatus | null> {
+  const rows = unwrap(await supabase.rpc('my_week')) as WeekStatus[];
+  return rows[0] ?? null;
+}
+
+export async function setWeekGoal(goal: number): Promise<void> {
+  unwrap(await supabase.rpc('set_week_goal', { p_goal: goal }));
+}
+
+/** weeks = null: pauze tot een van jullie hem uitzet */
+export async function startPause(weeks: 1 | 2 | 4 | null): Promise<void> {
+  unwrap(await supabase.rpc('start_pause', { p_weeks: weeks }));
+}
+
+export async function stopPause(): Promise<void> {
+  unwrap(await supabase.rpc('stop_pause'));
 }
 
 const ANSWER_FIELDS = 'id, user_id, day, body, created_at, updated_at, answer_reactions(id, answer_id, user_id, emoji, message, created_at)';

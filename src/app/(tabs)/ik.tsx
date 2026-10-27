@@ -1,12 +1,13 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
-import { AppText, Button, Card, ErrorText, Field, Row, Screen } from '@/components/ui';
-import { deleteAccount, leaveCouple, updateProfile } from '@/lib/api';
+import { AppText, Button, Card, Chip, ErrorText, Field, Row, Screen } from '@/components/ui';
+import { deleteAccount, fetchWeek, leaveCouple, setWeekGoal, startPause, stopPause, updateProfile } from '@/lib/api';
 import { confirmSignOut, signOut } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
+import { PAUSE_OPTIONS, pauseLabel, WEEK_GOALS, type WeekStatus } from '@/lib/rhythm';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
 import { useTheme, type ThemePref } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
@@ -26,6 +27,14 @@ export default function Ik() {
   const [error, setError] = useState<string | null>(null);
 
   const [pushInfo, setPushInfo] = useState<string | null>(null);
+  const [week, setWeek] = useState<WeekStatus | null>(null);
+
+  const loadWeek = useCallback(() => {
+    fetchWeek()
+      .then(setWeek)
+      .catch(() => setWeek(null));
+  }, []);
+  useFocusEffect(loadWeek);
 
   const partnerName = partner?.display_name || 'je partner';
   const phoneOnly = isPhoneOnlyAccount(session?.user);
@@ -103,6 +112,24 @@ export default function Ik() {
     if (theirs) return `${partnerName} heeft dit aangezet. Zet het ook aan als je dat wilt.`;
     return null;
   })();
+
+  const chooseGoal = (goal: number) =>
+    run('goal', async () => {
+      await setWeekGoal(goal);
+      loadWeek();
+    });
+
+  const pause = (weeks: 1 | 2 | 4 | null) =>
+    run('pause', async () => {
+      await startPause(weeks);
+      loadWeek();
+    });
+
+  const unpause = () =>
+    run('pause', async () => {
+      await stopPause();
+      loadWeek();
+    });
 
   const confirmUnlink = () =>
     Alert.alert(
@@ -234,6 +261,54 @@ export default function Ik() {
           </AppText>
         ) : null}
       </Card>
+
+      {week && (
+        <Card>
+          <AppText variant="large">Ons weekritme</AppText>
+          <AppText variant="small" muted>
+            Een samen-dag is een dag waarop jullie allebei de dagvraag beantwoorden. Kies samen hoeveel samen-dagen per
+            week bij jullie past. Een wijziging zien jullie allebei en geldt vanaf deze week.
+          </AppText>
+          <Row wrap>
+            {WEEK_GOALS.map((g) => (
+              <Chip
+                key={g}
+                label={String(g)}
+                active={week.chosen_goal === g}
+                onPress={() => chooseGoal(g)}
+                accessibilityLabel={`Weekdoel: ${g} samen-dagen`}
+              />
+            ))}
+          </Row>
+          <AppText variant="large" style={{ marginTop: spacing.sm }}>
+            Pauze
+          </AppText>
+          <AppText variant="small" muted>
+            Druk, op reis of even geen zin? Een gepauzeerde week telt niet mee en onderbreekt jullie ritme niet.
+          </AppText>
+          {pauseLabel(week) ? (
+            <AppText variant="small" color={colors.secondary} accessibilityLiveRegion="polite">
+              {pauseLabel(week)}
+            </AppText>
+          ) : null}
+          {week.pause_active ? (
+            <Button kind="secondary" label="Pauze uitzetten" onPress={unpause} busy={busy === 'pause'} />
+          ) : (
+            <Row wrap>
+              {PAUSE_OPTIONS.map((o) => (
+                <Button
+                  key={o.label}
+                  kind="secondary"
+                  label={o.label}
+                  onPress={() => pause(o.weeks)}
+                  disabled={busy !== null}
+                  accessibilityHint={o.weeks ? `Pauzeer jullie ritme ${o.label}` : 'Pauzeer tot een van jullie hem uitzet'}
+                />
+              ))}
+            </Row>
+          )}
+        </Card>
+      )}
 
       <Card>
         <AppText variant="large">18+ gesprekskaarten</AppText>

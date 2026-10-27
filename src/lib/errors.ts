@@ -12,6 +12,9 @@ const MESSAGES: Record<string, string> = {
   geen_partner: 'Koppel eerst je partner om de dagelijkse vraag te zien.',
   quiz_niet_klaar: 'De uitslag verschijnt zodra jullie allebei klaar zijn.',
   ongeldige_optie: 'Die keuze bestaat niet (meer). Kies een van de opties.',
+  ongeldig_weekdoel: 'Kies een weekdoel van 3 tot en met 7 samen-dagen.',
+  ongeldige_pauze: 'Kies een pauze van 1, 2 of 4 weken, of tot jullie hem uitzetten.',
+  al_gepauzeerd: 'Jullie ritme staat al op pauze.',
   geen_vragen: 'Er zijn nog geen vragen geladen. Controleer de database-migraties.',
 };
 

@@ -16,6 +16,7 @@ export type TodayQuestion = {
   depth: 1 | 2 | 3;
   answered: boolean;
   partner_answered: boolean;
+  /** reeks in weken (zie src/lib/rhythm.ts) */
   streak: number;
 };
 

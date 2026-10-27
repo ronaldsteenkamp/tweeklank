@@ -4,9 +4,10 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { fetchAnswers, fetchToday, saveAnswer } from '@/lib/api';
+import { fetchAnswers, fetchToday, fetchWeek, saveAnswer } from '@/lib/api';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
+import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhythm';
 import { useSession } from '@/lib/session';
 import type { Answer, TodayQuestion } from '@/lib/types';
 import { useCoupleRealtime } from '@/lib/useCoupleRealtime';
@@ -17,6 +18,7 @@ export default function Vandaag() {
   const { colors } = useTheme();
   const { me, partner, coupleId, refresh } = useSession();
   const [today, setToday] = useState<TodayQuestion | null>(null);
+  const [week, setWeek] = useState<WeekStatus | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -28,7 +30,9 @@ export default function Vandaag() {
     try {
       const q = await fetchToday();
       setToday(q);
-      setAnswers(await fetchAnswers(q.day));
+      const [a, w] = await Promise.all([fetchAnswers(q.day), fetchWeek()]);
+      setAnswers(a);
+      setWeek(w);
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
@@ -93,14 +97,10 @@ export default function Vandaag() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
-        <Row>
-          <AppText variant="label" muted style={{ flex: 1 }}>
-            {formatDayNl(today.day).toUpperCase()}
-          </AppText>
-          {today.streak > 0 && (
-            <Pill label={`🔥 ${today.streak} ${today.streak === 1 ? 'dag' : 'dagen'} samen`} />
-          )}
-        </Row>
+        <AppText variant="label" muted>
+          {formatDayNl(today.day).toUpperCase()}
+        </AppText>
+        {week && <WeekRhythm week={week} />}
         <View style={{ alignSelf: 'flex-start' }}>
           <Button
             kind="ghost"
@@ -155,5 +155,23 @@ export default function Vandaag() {
         <ErrorText message={error} />
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function WeekRhythm({ week }: { week: WeekStatus }) {
+  const streak = streakLabel(week.streak);
+  const pause = pauseLabel(week);
+  return (
+    <View style={{ gap: spacing.xs }} accessible accessibilityLabel={[week.week_paused ? null : weekLabel(week), streak, pause].filter(Boolean).join('. ')}>
+      <Row wrap>
+        {!week.week_paused && <Pill label={weekLabel(week)} />}
+        {streak && <Pill label={streak} tone="secondary" />}
+      </Row>
+      {pause && (
+        <AppText variant="small" muted>
+          {pause}
+        </AppText>
+      )}
+    </View>
   );
 }
