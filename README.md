@@ -132,6 +132,11 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
 - Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
 
+**Gisteren inhalen testen.**
+- Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
+- Tik op *Nu beantwoorden*. Het antwoord van je partner op gisteren zie je pas als je zelf hebt geantwoord, net als bij vandaag.
+- De kaart verschijnt alleen als jullie gisteren al een vraag hadden. Eergisteren kan niet meer. Een ingehaalde dag telt mee als samen-dag.
+
 **Weekritme testen.**
 - Een *samen-dag* is een dag waarop jullie allebei de dagvraag beantwoorden. Op **Vandaag** zie je bijvoorbeeld *"4 van 5 samen-dagen deze week"* en *"12 weken op rij"*.
 - Een week loopt van zondag tot en met zaterdag (Amsterdamse tijd). De lopende week telt mee zodra het doel gehaald is. Tot die tijd onderbreekt hij niets.
@@ -171,7 +176,7 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 
 - **RLS op elke tabel.** Je leest alleen je eigen data en die van je gekoppelde partner.
 - **Verborgen antwoorden.** Het antwoord van je partner blijft in de database zelf onzichtbaar tot je zelf hebt geantwoord. Dat geldt ook voor Realtime.
-- **Antwoorden zijn definitief.** Je kunt geen antwoorden geven voor een eerdere dag. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
+- **Antwoorden zijn definitief.** Alleen de vraag van gisteren kun je nog inhalen, tot het einde van vandaag. Eerder kan niet. Aanpassen kan alleen op de dag zelf. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
 - **Ontkoppelen wist alles.** Bij ontkoppelen verdwijnt alle gedeelde data voor jullie allebei. *Account verwijderen* wist daarnaast je account.
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
 - **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.

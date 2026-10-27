@@ -1,5 +1,6 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import type { YesterdayQuestion } from './catchup';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
@@ -84,6 +85,12 @@ export async function redeemTransferCode(code: string): Promise<void> {
 export async function fetchToday(): Promise<TodayQuestion> {
   const rows = unwrap(await supabase.rpc('get_today_question')) as TodayQuestion[];
   return rows[0];
+}
+
+/** De vraag van gisteren (alleen als die gisteren al aan jullie was toegewezen), anders null. */
+export async function fetchYesterday(): Promise<YesterdayQuestion | null> {
+  const rows = unwrap(await supabase.rpc('get_yesterday_question')) as YesterdayQuestion[];
+  return rows[0] ?? null;
 }
 
 // ---- Weekritme ----

@@ -3,8 +3,10 @@ import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
+import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { fetchAnswers, fetchToday, fetchWeek, saveAnswer } from '@/lib/api';
+import { fetchAnswers, fetchToday, fetchWeek, fetchYesterday, saveAnswer } from '@/lib/api';
+import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
 import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhythm';
@@ -19,6 +21,8 @@ export default function Vandaag() {
   const { me, partner, coupleId, refresh } = useSession();
   const [today, setToday] = useState<TodayQuestion | null>(null);
   const [week, setWeek] = useState<WeekStatus | null>(null);
+  const [yesterday, setYesterday] = useState<YesterdayQuestion | null>(null);
+  const [yesterdayAnswers, setYesterdayAnswers] = useState<Answer[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -30,9 +34,11 @@ export default function Vandaag() {
     try {
       const q = await fetchToday();
       setToday(q);
-      const [a, w] = await Promise.all([fetchAnswers(q.day), fetchWeek()]);
+      const [a, w, y] = await Promise.all([fetchAnswers(q.day), fetchWeek(), fetchYesterday()]);
       setAnswers(a);
       setWeek(w);
+      setYesterday(y);
+      setYesterdayAnswers(y && yesterdayView(y) === 'ingehaald' ? await fetchAnswers(y.day) : []);
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
@@ -109,6 +115,17 @@ export default function Vandaag() {
             accessibilityHint="Bekijk alle eerdere vragen en antwoorden"
           />
         </View>
+
+        {coupleId && (
+          <YesterdayCard
+            yesterday={yesterday}
+            answers={yesterdayAnswers}
+            me={me}
+            partner={partner}
+            coupleId={coupleId}
+            onChanged={load}
+          />
+        )}
 
         <Card tone="alt">
           <AppText variant="label" color={colors.secondary}>
