@@ -16,6 +16,9 @@ export const KIND_LABEL: Record<DateKind, string> = {
 export const SETTING_LABEL: Record<Setting, string> = { binnen: 'Binnen', buiten: 'Buiten', 'op afstand': 'Op afstand' };
 export const REMIND_OPTIONS = [0, 1, 3, 7, 14] as const;
 
+export type Season = 'lente' | 'zomer' | 'herfst' | 'winter';
+export type Holiday = 'sinterklaas' | 'koningsdag' | 'oud-en-nieuw';
+
 export type DateIdea = {
   id: number;
   slug: string;
@@ -25,6 +28,9 @@ export type DateIdea = {
   budget: Budget;
   setting: Setting;
   minutes: number;
+  /** null: past het hele jaar */
+  season?: Season | null;
+  holiday?: Holiday | null;
 };
 
 export type Plan = {
@@ -35,6 +41,7 @@ export type Plan = {
   done: boolean;
   created_at: string;
   created_by: string;
+  date_idea_id?: number | null;
 };
 
 export type ImportantDate = {
@@ -151,4 +158,54 @@ export function reunionLabel(days: number): string {
   if (days === 0) return 'Vandaag zien jullie elkaar weer';
   if (days === 1) return 'Morgen zien jullie elkaar weer';
   return `Nog ${days} dagen tot jullie elkaar weer zien`;
+}
+
+// ---- seizoenen en "Plan iets voor dit weekend" ----
+
+/** Meteorologisch seizoen van een dag ('YYYY-MM-DD'). */
+export function seasonOf(iso: string): Season {
+  const m = +iso.slice(5, 7);
+  return m >= 3 && m <= 5 ? 'lente' : m >= 6 && m <= 8 ? 'zomer' : m >= 9 && m <= 11 ? 'herfst' : 'winter';
+}
+
+/** Eerstvolgende datum van een feestdag. Koningsdag valt op 26 april als 27 april een zondag is. */
+export function nextHoliday(holiday: Holiday, today: string): string {
+  const year = +today.slice(0, 4);
+  const on = (y: number) => {
+    if (holiday === 'sinterklaas') return toIso(y, 12, 5);
+    if (holiday === 'oud-en-nieuw') return toIso(y, 12, 31);
+    return new Date(Date.UTC(y, 3, 27)).getUTCDay() === 0 ? toIso(y, 4, 26) : toIso(y, 4, 27);
+  };
+  return on(year) >= today ? on(year) : on(year + 1);
+}
+
+/** Feestdag-ideeën tonen we alleen in de drie weken ervoor (en op de dag zelf). */
+export const HOLIDAY_WINDOW_DAYS = 21;
+
+/**
+ * Drie ideeën voor dit weekend: passend bij het seizoen (of het hele jaar), het gekozen budget en
+ * binnen/buiten/op afstand. Ideeën die nog niet op jullie lijst staan, gaan voor; een feestdag die
+ * eraan komt ook. Binnen dezelfde voorkeur is de volgorde willekeurig.
+ */
+export function suggestWeekend(
+  ideas: DateIdea[],
+  f: { today: string; budget: Budget | null; setting: Setting | null; plannedIdeaIds: number[]; rng?: () => number },
+  count = 3,
+): DateIdea[] {
+  const season = seasonOf(f.today);
+  const planned = new Set(f.plannedIdeaIds);
+  const rng = f.rng ?? Math.random;
+  return ideas
+    .filter((i) => !i.season || i.season === season)
+    .filter((i) => !i.holiday || daysUntil(nextHoliday(i.holiday, f.today), f.today) <= HOLIDAY_WINDOW_DAYS)
+    .filter((i) => !f.budget || i.budget === f.budget)
+    .filter((i) => !f.setting || i.setting === f.setting)
+    .map((i) => ({
+      i,
+      score: (planned.has(i.id) ? 0 : 4) + (i.holiday ? 2 : 0) + (i.season ? 1 : 0),
+      tie: rng(),
+    }))
+    .sort((a, b) => b.score - a.score || a.tie - b.tie)
+    .slice(0, count)
+    .map((x) => x.i);
 }

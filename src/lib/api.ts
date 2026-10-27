@@ -445,7 +445,7 @@ export async function fetchDateIdeas(): Promise<DateIdea[]> {
   return unwrap(await supabase.from('date_ideas').select('*').order('position')) as DateIdea[];
 }
 
-const PLAN_FIELDS = 'id, title, notes, planned_for, done, created_at, created_by';
+const PLAN_FIELDS = 'id, title, notes, planned_for, done, created_at, created_by, date_idea_id';
 
 export async function fetchPlans(): Promise<Plan[]> {
   return unwrap(await supabase.from('plans').select(PLAN_FIELDS)) as Plan[];

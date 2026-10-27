@@ -33,7 +33,7 @@ Alles is zelf geschreven, in het Nederlands.
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 9 thema's × 15 kaarten (waaronder *Op afstand*) + 18+-set van 15 |
 | Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
-| Date-ideeën | 50 (waarvan 8 voor op afstand) |
+| Date-ideeën | 65 (waarvan 8 voor op afstand en 15 bij een seizoen of feestdag) |
 
 ## Techniek
 
@@ -172,6 +172,10 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 **Op afstand testen.**
 - Bij **Kaarten** staat het thema *Op afstand* (15 kaarten, 5 per diepgang). Bij de date-ideeën filter je op *Op afstand*.
 - Voeg onder *Belangrijke datums* de soort *We zien elkaar weer* toe. Zolang die datum nog komt, staat bovenaan **Vandaag** bijvoorbeeld *"Nog 12 dagen tot jullie elkaar weer zien"*.
+
+**Seizoensdates testen.**
+- Date-ideeën hebben nu een optioneel seizoen (meteorologisch: lente = maart–mei, enzovoort) en een optionele feestdag (Sinterklaas, Koningsdag, oud en nieuw).
+- Tik bij de date-ideeën op **Plan iets voor dit weekend**. Je krijgt drie ideeën die passen bij het seizoen en bij je filters voor budget en binnen/buiten/op afstand. Ideeën die nog niet op jullie lijst staan, gaan voor. Een feestdag-idee verschijnt alleen in de drie weken ervoor.
 
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.

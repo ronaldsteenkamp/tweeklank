@@ -2,11 +2,12 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { AppText, Button, Card, Chip, ErrorText, Row, Screen } from '@/components/ui';
-import { addPlan, fetchDateIdeas } from '@/lib/api';
+import { addPlan, fetchDateIdeas, fetchPlans } from '@/lib/api';
+import { amsterdamDay } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
 import { minutesLabel } from '@/lib/exercises';
 import { useSession } from '@/lib/session';
-import { BUDGET_LABEL, BUDGETS, filterIdeas, SETTING_LABEL, type Budget, type DateIdea, type Setting } from '@/lib/together';
+import { BUDGET_LABEL, BUDGETS, filterIdeas, SETTING_LABEL, suggestWeekend, type Budget, type DateIdea, type Setting } from '@/lib/together';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function Ideeen() {
@@ -16,11 +17,21 @@ export default function Ideeen() {
   const [budget, setBudget] = useState<Budget | null>(null);
   const [setting, setSetting] = useState<Setting | null>(null);
   const [added, setAdded] = useState<Set<number>>(new Set());
+  const [planned, setPlanned] = useState<number[]>([]);
+  const [suggestions, setSuggestions] = useState<DateIdea[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchDateIdeas().then(setIdeas).catch((e) => setError(friendlyError(e)));
+    Promise.all([fetchDateIdeas(), fetchPlans()])
+      .then(([i, p]) => {
+        setIdeas(i);
+        setPlanned(p.map((x) => x.date_idea_id).filter((id): id is number => typeof id === 'number'));
+      })
+      .catch((e) => setError(friendlyError(e)));
   }, []);
+
+  const suggest = () =>
+    setSuggestions(suggestWeekend(ideas, { today: amsterdamDay(), budget, setting, plannedIdeaIds: [...planned, ...added] }));
 
   const add = async (idea: DateIdea) => {
     if (!me || !coupleId) return;
@@ -31,6 +42,23 @@ export default function Ideeen() {
       setError(friendlyError(e));
     }
   };
+
+  const renderIdea = (idea: DateIdea) => (
+    <Card key={idea.slug}>
+      <AppText variant="label" color={colors.secondary}>
+        {BUDGET_LABEL[idea.budget]} · {SETTING_LABEL[idea.setting]} · {minutesLabel(idea.minutes)}
+      </AppText>
+      <AppText variant="large">{idea.title}</AppText>
+      <AppText muted>{idea.description}</AppText>
+      <View style={{ alignSelf: 'flex-start' }}>
+        {added.has(idea.id) ? (
+          <Button kind="ghost" label="Op jullie lijst ✓ Bekijk" onPress={() => router.push('/plannen')} />
+        ) : (
+          <Button kind="secondary" label="Zet op onze lijst" onPress={() => add(idea)} accessibilityHint={`Voegt ${idea.title} toe aan jullie plannen`} />
+        )}
+      </View>
+    </Card>
+  );
 
   const shown = filterIdeas(ideas, { budget, setting });
 
@@ -54,26 +82,25 @@ export default function Ideeen() {
         <Chip label="Buiten" active={setting === 'buiten'} onPress={() => setSetting('buiten')} />
         <Chip label="Op afstand" active={setting === 'op afstand'} onPress={() => setSetting('op afstand')} />
       </Row>
+      <Button
+        kind="secondary"
+        label="Plan iets voor dit weekend"
+        onPress={suggest}
+        accessibilityHint="Drie ideeën die passen bij het seizoen en jullie filters"
+      />
+      {suggestions && (
+        <Card tone="alt">
+          <AppText variant="large" accessibilityLiveRegion="polite">
+            {suggestions.length ? 'Drie ideeën voor dit weekend' : 'Geen ideeën met deze filters. Probeer een ander budget.'}
+          </AppText>
+          {suggestions.map((idea) => renderIdea(idea))}
+        </Card>
+      )}
       <ErrorText message={error} />
       <AppText variant="small" muted accessibilityLiveRegion="polite">
         {shown.length} {shown.length === 1 ? 'idee' : 'ideeën'}
       </AppText>
-      {shown.map((idea) => (
-        <Card key={idea.slug}>
-          <AppText variant="label" color={colors.secondary}>
-            {BUDGET_LABEL[idea.budget]} · {SETTING_LABEL[idea.setting]} · {minutesLabel(idea.minutes)}
-          </AppText>
-          <AppText variant="large">{idea.title}</AppText>
-          <AppText muted>{idea.description}</AppText>
-          <View style={{ alignSelf: 'flex-start' }}>
-            {added.has(idea.id) ? (
-              <Button kind="ghost" label="Op jullie lijst ✓ Bekijk" onPress={() => router.push('/plannen')} />
-            ) : (
-              <Button kind="secondary" label="Zet op onze lijst" onPress={() => add(idea)} accessibilityHint={`Voegt ${idea.title} toe aan jullie plannen`} />
-            )}
-          </View>
-        </Card>
-      ))}
+      {shown.map((idea) => renderIdea(idea))}
     </Screen>
   );
 }
