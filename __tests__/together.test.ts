@@ -2,7 +2,9 @@ import {
   daysUntil,
   filterIdeas,
   nextOccurrence,
+  nextReunion,
   parseDateParts,
+  reunionLabel,
   relativeLabel,
   sortDates,
   sortPlans,
@@ -82,5 +84,28 @@ describe('ideeën en plannen', () => {
     });
     const sorted = sortPlans([p(1, null, false, '2026-01-01'), p(2, '2026-05-01', true), p(3, '2026-04-01', false), p(4, null, false, '2026-02-01')]);
     expect(sorted.map((x) => x.id)).toEqual([3, 4, 1, 2]);
+  });
+});
+
+describe('weerzien en op afstand', () => {
+  const d = (title: string, date: string, kind: ImportantDate['kind'] = 'weerzien', yearly = false) => ({ title, date, kind, yearly });
+
+  it('vindt het eerstvolgende weerzien in de toekomst', () => {
+    const dates = [d('Kerst', '2026-12-20'), d('Weekend', '2026-11-06'), d('Jubileum', '2026-10-30', 'jubileum', true), d('Vorige keer', '2026-10-01')];
+    expect(nextReunion(dates, '2026-10-27')).toEqual({ title: 'Weekend', days: 10 });
+    expect(nextReunion([d('Voorbij', '2026-10-01')], '2026-10-27')).toBeNull();
+  });
+
+  it('telt rustig af', () => {
+    expect(reunionLabel(12)).toBe('Nog 12 dagen tot jullie elkaar weer zien');
+    expect(reunionLabel(1)).toBe('Morgen zien jullie elkaar weer');
+    expect(reunionLabel(0)).toBe('Vandaag zien jullie elkaar weer');
+  });
+
+  it('filtert ideeën voor op afstand', () => {
+    const idea = (id: number, setting: DateIdea['setting']): DateIdea => ({
+      id, slug: `di-${id}`, position: id, title: '', description: '', budget: 'gratis', setting, minutes: 60,
+    });
+    expect(filterIdeas([idea(1, 'binnen'), idea(2, 'op afstand')], { budget: null, setting: 'op afstand' }).map((i) => i.id)).toEqual([2]);
   });
 });

@@ -2,6 +2,8 @@
 
 Een **volledig gratis** relatie-app voor koppels. Er is geen abonnement, geen premium-laag, geen in-app aankoop en geen advertentie. Ook tracking of analytics van derden zit er niet in.
 
+> **Onze belofte:** Tweeklank blijft gratis. Bestaande functies komen nooit achter een betaalmuur.
+
 Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het antwoord van je partner zie je pas als je zelf hebt geantwoord.
 
 ## Status
@@ -17,6 +19,8 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ✅ |
 | 7 | Afronding: toegankelijkheid, lint, privacy, store-voorbereiding | ✅ |
 | 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
+| 9 | Quick wins: 60 extra dagvragen, strengere contentcheck, weekritme met pauze, gisteren inhalen, hulppagina, inclusieve teksten, onderbouwing bij oefeningen, kaarten schudden | ✅ |
+| 10 | Volgend kwartaal: slimme rotatie en "Een jaar geleden", 180 dagvragen, themaweken, "Ik denk aan je" en eigen meldtijd, solo-kaart, maandelijkse check-in, herstelcode en export, op afstand | ✅ |
 
 ## Startcontent
 
@@ -24,11 +28,12 @@ Alles is zelf geschreven, in het Nederlands.
 
 | Onderdeel | Aantal |
 |---|---|
-| Dagelijkse vragen | 60 |
+| Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
+| Themaweken | 6 series × 7 vragen, elk met intro en afsluitende oefening |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
-| Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
-| Oefeningen | 12 |
-| Date-ideeën | 42 |
+| Gesprekskaarten | 9 thema's × 15 kaarten (waaronder *Op afstand*) + 18+-set van 15 |
+| Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
+| Date-ideeën | 50 (waarvan 8 voor op afstand) |
 
 ## Techniek
 
@@ -42,7 +47,8 @@ src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
-supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, streaks, meldingen, quiz, kaarten, oefeningen, samen)
+supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen,
+                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand)
 supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
@@ -82,8 +88,8 @@ Het project **tweeklank** draait al:
 6. **Pushmeldingen.** Dit kun je ook later doen; de app werkt prima zonder.
    1. Deploy de functie: `npx supabase functions deploy send-push --no-verify-jwt`.
    2. Vul in `supabase/sql/cron-en-webhook.sql` je project-URL in en draai het bestand eenmalig in de *SQL Editor*. Dat zet klaar:
-      - de trigger voor *"partner heeft geantwoord"*;
-      - de cron-jobs voor 9:00 uur;
+      - de triggers voor *"partner heeft geantwoord"* en *"Ik denk aan je"*;
+      - één cron-job elk heel uur, die alleen wie dat uur als meldtijd koos de dagmelding en datumherinneringen stuurt (standaard 9:00);
       - een willekeurig geheim in de Vault.
 
       `send-push` leest dat geheim zelf uit de Vault. Er is dus geen Edge Function-secret nodig.
@@ -124,19 +130,70 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 **Gesprekskaarten testen.**
 - Open **Kaarten** en kies een thema.
 - Filter op diepgang (luchtig, persoonlijk of diep) en swipe door de kaarten, of gebruik Vorige/Volgende.
+- Tik op **Schud** voor een willekeurige volgorde. Die geldt alleen op jouw toestel, zolang het scherm open is, en houdt rekening met het diepgangsfilter. Een schermlezer meldt *"Kaarten geschud"*.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
 
 **Samen plannen testen.**
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
-- Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
+- Datumherinneringen komen op je eigen meldtijd (standaard 9:00) als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
+
+**Rotatie en "Een jaar geleden" testen.**
+- Een koppel krijgt eerst alle vragen die het nog niet had, op volgorde. Pas daarna komen vragen terug: de vraag die het langst geleden is gesteld.
+- Bij een terugkerende vraag verschijnt na je eigen antwoord een ingeklapte kaart *"Een jaar geleden schreef je…"*. Daarin staat je antwoord van toen, en dat van je partner als je die dag zelf ook had geantwoord.
+- Uitzetten kan per persoon onder **Ik → Een jaar geleden**.
+- Snel proberen zonder een jaar te wachten: zie `supabase/tests/12_rotatie.sql`.
+
+**Themaweken testen.**
+- Na de eerste 60 gewone vragen verschijnt op **Vandaag**, nadat je zelf hebt geantwoord, de kaart *Zin in een themaweek?*. Er zijn zes series: *Hoe wij ruzie maken*, *Geld en wij*, *Waar we vandaan komen*, *Kleine momenten*, *Op afstand* en *Ons soort gezin*.
+- Wie eerst kiest, ziet *"Wacht op …"*. Kiezen jullie allebei dezelfde, dan begint de serie de volgende dag: zeven vragen met *"dag 3 van 7"*, en op dag 7 een oefening om af te sluiten. Daarna gaan de gewone vragen verder waar ze waren.
+- *Nu niet* verbergt het aanbod twee weken, alleen voor jou.
+- Zonder 60 dagen te wachten: zie `supabase/tests/13_themaweken.sql`.
+
+**Solo-kaart testen.**
+- Heeft je partner drie dagen of langer geen dagvraag beantwoord, terwijl jij wel antwoordt, dan zie je alleen in de app een rustige kaart *Even alleen aan de beurt*. Er gaat geen pushmelding uit en je partner ziet niets.
+- De kaart noemt nooit een aantal dagen of datums. Hij bevat een korte uitleg over verschillende behoeften aan nabijheid, één gespreksopener voor buiten de app en onderaan de link naar de hulppagina.
+- *Wegklikken* verbergt hem; hij komt hoogstens één keer per 14 dagen terug. Zie `supabase/tests/15_solo.sql`.
+
+**Maandelijkse check-in testen.**
+- Van de 1e t/m de 7e van elke maand staat op **Vandaag** de kaart *Hoe gaat het met ons?*. Je vindt hem ook onder **Ik**.
+- Vier schaalvragen van 1 tot 5 (verbondenheid, gewaardeerd voelen, onenigheid oplossen, tijd samen) en één open vraag. Na het delen ligt je check-in vast.
+- De antwoorden van je partner zie je pas als je zelf hebt ingevuld. Daarna zie je per vraag alleen de verschuiving ten opzichte van vorige maand (*iets meer*, *gelijk*, *iets minder*). Er is geen totaalscore en geen grafiek.
+- Gaf een van jullie twee maanden op rij een 1 of 2, dan staat er bij die vraag alleen *"Wil je hier meer over praten? Deze oefeningen kunnen helpen"*, met oefeningen en de hulppagina. Er gaat geen melding uit en er staat niet bij wie.
+- Zonder op de 1e te wachten: zie `supabase/tests/16_checkin.sql`.
+
+**Herstel en export testen.**
+- Een account zonder e-mail ziet na zeven dagen één keer de kaart *Bewaar een manier om terug te komen*. Daarna staat hij alleen nog onder **Ik**.
+- *E-mail koppelen* stuurt een bevestigingslink (`supabase.auth.updateUser`). Daarvoor is een eigen SMTP-server nodig, zie stap 7 van *Supabase opzetten*.
+- *Herstelcode maken* geeft een code van 16 tekens die lang geldig is en één keer werkt. Een overzetcode is maar 15 minuten geldig en dus niet om te bewaren. Je gebruikt de herstelcode op een nieuwe telefoon via *Ik heb een overzetcode*.
+- **Ik → Jullie gegevens downloaden** maakt een JSON-bestand of een leesbare HTML-pagina op het toestel en opent het deelmenu (in de browser: een download). Je partner staat er alleen in voor dagen waarop jullie allebei hebben geantwoord.
+
+**Op afstand testen.**
+- Bij **Kaarten** staat het thema *Op afstand* (15 kaarten, 5 per diepgang). Bij de date-ideeën filter je op *Op afstand*.
+- Voeg onder *Belangrijke datums* de soort *We zien elkaar weer* toe. Zolang die datum nog komt, staat bovenaan **Vandaag** bijvoorbeeld *"Nog 12 dagen tot jullie elkaar weer zien"*.
+
+**Gisteren inhalen testen.**
+- Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
+- Tik op *Nu beantwoorden*. Het antwoord van je partner op gisteren zie je pas als je zelf hebt geantwoord, net als bij vandaag.
+- De kaart verschijnt alleen als jullie gisteren al een vraag hadden. Eergisteren kan niet meer. Een ingehaalde dag telt mee als samen-dag.
+
+**Weekritme testen.**
+- Een *samen-dag* is een dag waarop jullie allebei de dagvraag beantwoorden. Op **Vandaag** zie je bijvoorbeeld *"4 van 5 samen-dagen deze week"* en *"12 weken op rij"*.
+- Een week loopt van zondag tot en met zaterdag (Amsterdamse tijd). De lopende week telt mee zodra het doel gehaald is. Tot die tijd onderbreekt hij niets.
+- Kies onder **Ik → Ons weekritme** een weekdoel van 3 tot en met 7 (standaard 5). Een nieuw doel geldt vanaf deze week, eerdere weken houden hun doel.
+- Zet daar ook een **pauze** aan: 1, 2 of 4 weken, of tot jullie hem uitzetten. Een gepauzeerde week telt niet mee en onderbreekt de reeks niet. Jullie kunnen hem allebei aan- en uitzetten.
+- In de eerste week telt het doel hoogstens het aantal dagen dat er nog over was. Bestaande koppels behouden zo hun voortgang.
 
 **Pushmeldingen testen.**
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.
 - **Android:** Expo Go ondersteunt geen pushmeldingen. Maak daarom een development build met `npx eas-cli build --profile development --platform android`. Dat kan gratis. Installeer de APK en start dan `npx expo start`.
 - Werkt de trigger? Kijk in de logs van de Edge Function `send-push` in het dashboard.
-- Testen zonder op 9 uur te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"daily","force":true}'::jsonb);`.
+- Testen zonder op je meldtijd te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"hourly","hour":9}'::jsonb);`. Dat bedient iedereen met meldtijd 9:00 die vandaag nog niets kreeg. Nog een keer proberen: `delete from public.push_daily_log where day = public.ams_today();`.
+- **Eigen meldtijd:** kies onder **Ik → Meldingen** met *Eerder* en *Later* het uur van de dagmelding. Eén cron-job per uur bedient alleen wie dat uur koos. Als de klok teruggaat, komt de melding niet dubbel. Als de klok vooruitgaat, komt de melding van het overgeslagen uur een uur later.
+- **Ik denk aan je:** op **Vandaag**, één keer per dag per persoon (afgedwongen in de database). De melding is *"[naam] denkt aan je"*, zonder inhoud. De ontvanger kan dit uitzetten onder **Ik → Meldingen**. De verzender ziet dan alleen *"Nu niet beschikbaar"*.
+
+> **Na deze update:** draai `supabase/sql/cron-en-webhook.sql` opnieuw in de SQL Editor en deploy `send-push` opnieuw. Het script vervangt de twee oude cron-jobs (07:00 en 08:00 UTC) door één job per uur en zet de trigger voor *Ik denk aan je* klaar.
 
 **Overzetten naar een nieuwe telefoon testen.**
 1. Ga op toestel 1 naar **Ik → Naar een nieuwe telefoon** en tik op *Maak een overzetcode*.
@@ -152,7 +209,7 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 npm test                # Jest: datum/tijdzone, codes, kleurcontrast (WCAG AA), meldingen, quiz, kaarten, plannen
 npm run typecheck       # TypeScript
 npm run lint            # ESLint (eslint-config-expo)
-npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
+npm run check:content   # aantallen, (bijna) dubbele vragen, gegenderde woorden en de diepgangsverdeling
 npm run test:db         # pgTAP: alle RLS-regels en databaselogica (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
@@ -164,12 +221,28 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 
 - **RLS op elke tabel.** Je leest alleen je eigen data en die van je gekoppelde partner.
 - **Verborgen antwoorden.** Het antwoord van je partner blijft in de database zelf onzichtbaar tot je zelf hebt geantwoord. Dat geldt ook voor Realtime.
-- **Antwoorden zijn definitief.** Je kunt geen antwoorden geven voor een eerdere dag. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
+- **Antwoorden zijn definitief.** Alleen de vraag van gisteren kun je nog inhalen, tot het einde van vandaag. Eerder kan niet. Aanpassen kan alleen op de dag zelf. Een antwoord intrekken nadat je dat van je partner hebt gelezen, kan ook niet.
 - **Ontkoppelen wist alles.** Bij ontkoppelen verdwijnt alle gedeelde data voor jullie allebei. *Account verwijderen* wist daarnaast je account.
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
 - **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
-- **Overzetcodes.** Een overzetcode is 15 minuten en één keer geldig. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
+- **Overzetcodes en herstelcodes.** Een overzetcode is 15 minuten en één keer geldig. Een herstelcode heeft 16 tekens, is lang geldig en werkt één keer. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
+- **Export op het toestel.** De export (JSON of HTML) wordt op de telefoon gemaakt en via het deelmenu gedeeld. Er blijft geen kopie op een server.
+
+## Hulppagina "Als het niet goed gaat"
+
+Een statisch scherm (`src/app/hulp.tsx`, gegevens in `src/lib/help.ts`). Je vindt het via een kleine link onder **Ik**, onderaan **Oefeningen** en bij het kaartthema **Onenigheid**. Er wordt niets opgeslagen, er gaat geen melding uit en er is geen analyse.
+
+| Gegeven | Bron | Gecontroleerd |
+|---|---|---|
+| Veilig Thuis, 0800-2000, gratis, 24/7, anoniem | rijksoverheid.nl en gemeentepagina's (Utrecht, Den Haag) via zoekresultaten | 27-10-2026 |
+| 113 Zelfmoordpreventie, 113 en gratis 0800-0113, chat op 113.nl | folder op 113.nl (pdf) en hartvannederland.nl via zoekresultaten | 27-10-2026 |
+| Fier, 088-2080000, anoniem contact mogelijk | help.unhcr.org en findahelpline.com via zoekresultaten | 27-10-2026 |
+| POH-GGZ bij de huisarts | praktijkwebsites en richtlijnendatabase.nl via zoekresultaten | 27-10-2026 |
+| NVRG (nvrg.nl) voor geregistreerde relatie- en gezinstherapeuten | Volkskrant (via eft.nl) en mijnzzp.nl via zoekresultaten | 27-10-2026 |
+| 112 bij acuut gevaar | rijksoverheid.nl | 27-10-2026 |
+
+> **Let op:** de officiële websites zelf konden vanuit de bouwomgeving niet worden geopend. Controleer de nummers en links nog een keer op veiligthuis.nl, 113.nl, fier.nl en nvrg.nl voordat je de app naar de stores stuurt.
 
 ## Toegankelijkheid
 
@@ -195,7 +268,12 @@ De app gebruikt alleen gratis diensten: Supabase free tier, Expo/EAS free tier e
    - **Leeftijdsclassificatie:** door de optionele 18+-kaarten is 17+ (App Store) of *Mature/18+* (Play Store) het verstandigst. Vermeld dat de 18+-content standaard uit staat.
    - **Privacylabels:** er is geen tracking. De app verzamelt een naam en door de gebruiker gemaakte content (antwoorden, plannen), en alleen als iemand daarvoor kiest een e-mailadres. Alles uitsluitend voor de werking van de app en niet gekoppeld aan advertenties.
    - **Account verwijderen in de app:** dat is verplicht voor beide stores en zit al in de app, onder *Ik → Account verwijderen*.
-6. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Die staat klaar in `docs/index.html`, met dezelfde tekst als in de app.
+6. **Concepttekst voor de store.**
+   > **Tweeklank: elke dag een vraag, samen.**
+   > Beantwoord elke dag dezelfde vraag als je partner. Je ziet het antwoord van de ander pas als je zelf hebt geantwoord. Met gesprekskaarten, quizzen, korte oefeningen en een gedeelde lijst met plannen. Ook fijn als jullie op afstand wonen.
+   >
+   > Tweeklank blijft gratis. Bestaande functies komen nooit achter een betaalmuur. Geen abonnement, geen advertenties en geen tracking. Jullie antwoorden zijn alleen voor jullie twee.
+7. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Die staat klaar in `docs/index.html`, met dezelfde tekst als in de app.
    - Zet hem online via GitHub: *Settings → Pages → Build and deployment → Deploy from a branch*, kies `main` en de map `/docs`.
    - De URL wordt dan `https://ronaldsteenkamp.github.io/tweeklank/`.
    - Pas je de tekst in `src/app/privacy.tsx` aan? Draai dan `node scripts/make-privacy-page.mjs`.
@@ -210,6 +288,11 @@ insert into public.daily_questions (slug, position, depth, text) values
 on conflict (slug) do nothing;
 ```
 
-Draai daarna `npx supabase db push` en `npm run check:content`.
+Draai daarna `npx supabase db push` en `npm run check:content`. De contentcheck controleert:
+- **(bijna) dubbele dagvragen**, ook tegen de bestaande (overlap van inhoudswoorden, `scripts/content-rules.js`);
+- **gegenderde woorden** zoals *hij of zij*, *hem of haar*, *vriend*, *man* of *vrouw*, in de content en in de app. Schrijf *je partner* of *de ander*;
+- **de diepgangsverdeling** van de dagvragen: ongeveer 45% luchtig, 35% persoonlijk en 20% diep, in totaal en per portie van 60.
+
+Een bestaande tekst aanpassen? Gebruik een `update … where slug = …;` op één regel, zoals in `…_inclusief.sql`. De contentcheck leest die updates mee.
 
 Het werkt hetzelfde voor quizzen (`quizzes`, `quiz_questions`), kaarten (`themes`, `theme_questions`), oefeningen (`exercises`) en date-ideeën (`date_ideas`). Kijk naar de bestaande `…_content_….sql`-migraties als voorbeeld.

@@ -1,6 +1,6 @@
 -- Tests: oefeningen en het gedeelde logboek
 begin;
-select plan(8);
+select plan(10);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'a@test.nl'),
@@ -45,6 +45,10 @@ set local role authenticated;
 select public.leave_couple();
 reset role;
 select is((select count(*) from public.exercise_completions), 0::bigint, 'ontkoppelen wist het logboek');
+
+select is((select count(*)::int from public.exercises where source like 'Geïnspireerd op %'), 12,
+  'alle 12 oefeningen hebben een onderbouwing die begint met "Geïnspireerd op"');
+select is((select count(*)::int from public.exercises where source ~* 'bewezen'), 0, 'geen enkele oefening claimt "bewezen"');
 
 select * from finish();
 rollback;

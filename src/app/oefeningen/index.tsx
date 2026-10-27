@@ -1,6 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { HelpLink } from '@/components/HelpLink';
 import { AppText, Chip, ErrorText, Pill, Row, Screen } from '@/components/ui';
 import { fetchCompletions, fetchExercises } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
@@ -86,6 +87,7 @@ export default function Oefeningen() {
           </Pressable>
         );
       })}
+      <HelpLink />
     </Screen>
   );
 }

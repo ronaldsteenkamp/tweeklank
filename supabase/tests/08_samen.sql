@@ -28,7 +28,7 @@ insert into public.push_tokens (token, user_id, platform) values
 -- Plannen
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 set local role authenticated;
-select is((select count(*) from public.date_ideas), 42::bigint, 'date-ideeën leesbaar');
+select is((select count(*) from public.date_ideas), 50::bigint, 'date-ideeën leesbaar');
 select lives_ok($$
   insert into public.plans (couple_id, created_by, title, date_idea_id, planned_for)
   select public.my_couple_id(), auth.uid(), title, id, '2026-11-01' from public.date_ideas where slug = 'di-01'
@@ -55,7 +55,7 @@ select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-1111111
 set local role authenticated;
 select is((select done from public.plans), true, 'A ziet dat B het plan heeft afgevinkt');
 select is((select count(*) from public.important_dates), 3::bigint, 'A ziet de datums van B');
-select throws_ok($$ select * from public.push_targets_date_reminders('2026-03-10') $$, '42501', null,
+select throws_ok($$ select * from public.push_targets_date_reminders((select array_agg(id) from public.profiles), '2026-03-10') $$, '42501', null,
   'clients kunnen herinneringsontvangers niet opvragen');
 reset role;
 
@@ -68,18 +68,18 @@ reset role;
 -- Herinneringen op 10 maart 2026: Jubileum (over 7 dagen) en Verjaardag Sam (vandaag); Concert pas op 9 maart
 set local role service_role;
 select results_eq($$
-  select token, title, days_until from public.push_targets_date_reminders('2026-03-10') order by title, token
+  select token, title, days_until from public.push_targets_date_reminders((select array_agg(id) from public.profiles), '2026-03-10') order by title, token
 $$, $$ values
   ('ExponentPushToken[aaa]'::text, 'Jubileum'::text, 7), ('ExponentPushToken[bbb]', 'Jubileum', 7),
   ('ExponentPushToken[aaa]', 'Verjaardag Sam', 0), ('ExponentPushToken[bbb]', 'Verjaardag Sam', 0)
 $$, 'herinnering 7 dagen vooraf en op de dag zelf, voor beide partners (en niet voor C)');
-select results_eq($$ select title, days_until from public.push_targets_date_reminders('2026-03-09') where token = 'ExponentPushToken[aaa]' $$,
+select results_eq($$ select title, days_until from public.push_targets_date_reminders((select array_agg(id) from public.profiles), '2026-03-09') where token = 'ExponentPushToken[aaa]' order by title $$,
   $$ values ('Concert'::text, 3), ('Verjaardag Sam', 1) $$, 'herinneringen een dag eerder: Concert over 3 dagen, Sam morgen');
 reset role;
 
 update public.profiles set notify_dates = false where id = '22222222-2222-2222-2222-222222222222';
 set local role service_role;
-select is((select count(*) from public.push_targets_date_reminders('2026-03-10') where token = 'ExponentPushToken[bbb]'), 0::bigint,
+select is((select count(*) from public.push_targets_date_reminders((select array_agg(id) from public.profiles), '2026-03-10') where token = 'ExponentPushToken[bbb]'), 0::bigint,
   'geen herinneringen voor wie ze heeft uitgezet');
 reset role;
 

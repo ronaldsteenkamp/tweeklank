@@ -38,6 +38,10 @@ function ThemedStack() {
         <Stack.Screen name="overzetten" options={{ headerShown: true, title: 'Overzetten', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="overzetcode" options={{ headerShown: true, title: 'Overzetten', headerBackTitle: 'Terug' }} />
         <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="herstelcode" options={{ headerShown: true, title: 'Herstelcode', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="email-koppelen" options={{ headerShown: true, title: 'E-mail koppelen', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="checkin" options={{ headerShown: true, title: 'Check-in', headerBackTitle: 'Terug' }} />
+        <Stack.Screen name="hulp" options={{ headerShown: true, title: 'Hulp', headerBackTitle: 'Terug' }} />
       </Stack>
     </>
   );

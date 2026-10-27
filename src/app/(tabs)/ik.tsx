@@ -1,12 +1,19 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
-import { AppText, Button, Card, ErrorText, Field, Row, Screen } from '@/components/ui';
-import { deleteAccount, leaveCouple, updateProfile } from '@/lib/api';
+import { HelpLink } from '@/components/HelpLink';
+import { RecoveryCard } from '@/components/RecoveryCard';
+import { AppText, Button, Card, Chip, ErrorText, Field, Row, Screen } from '@/components/ui';
+import { deleteAccount, fetchArchive, fetchImportantDates, fetchPlans, fetchWeek, leaveCouple, setWeekGoal, startPause, stopPause, updateProfile } from '@/lib/api';
 import { confirmSignOut, signOut } from '@/lib/auth';
+import { amsterdamDay } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
+import { buildExport, exportFileName, exportHtml } from '@/lib/export';
+import { shareExportFile } from '@/lib/exportFile';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
+import { hourLabel, shiftHour } from '@/lib/nudge';
+import { PAUSE_OPTIONS, pauseLabel, WEEK_GOALS, type WeekStatus } from '@/lib/rhythm';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
 import { useTheme, type ThemePref } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
@@ -26,17 +33,25 @@ export default function Ik() {
   const [error, setError] = useState<string | null>(null);
 
   const [pushInfo, setPushInfo] = useState<string | null>(null);
+  const [week, setWeek] = useState<WeekStatus | null>(null);
+
+  const loadWeek = useCallback(() => {
+    fetchWeek()
+      .then(setWeek)
+      .catch(() => setWeek(null));
+  }, []);
+  useFocusEffect(loadWeek);
 
   const partnerName = partner?.display_name || 'je partner';
   const phoneOnly = isPhoneOnlyAccount(session?.user);
 
-  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates', value: boolean) =>
+  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates' | 'notify_nudges', value: boolean) =>
     run(key, async () => {
       if (!session || !me) return;
       setPushInfo(null);
       await updateProfile(session.user.id, { [key]: value });
       const next = { ...me, [key]: value };
-      const anyOn = next.notify_new_question || next.notify_partner_answered || next.notify_dates;
+      const anyOn = next.notify_new_question || next.notify_partner_answered || next.notify_dates || next.notify_nudges;
       if (anyOn) {
         const result = await registerForPush();
         if (!result.ok) setPushInfo(result.message);
@@ -103,6 +118,41 @@ export default function Ik() {
     if (theirs) return `${partnerName} heeft dit aangezet. Zet het ook aan als je dat wilt.`;
     return null;
   })();
+
+  const changeHour = (delta: number) =>
+    run('hour', async () => {
+      if (!session || !me) return;
+      await updateProfile(session.user.id, { notify_hour: shiftHour(me.notify_hour ?? 9, delta) });
+      await refresh();
+    });
+
+  const chooseGoal = (goal: number) =>
+    run('goal', async () => {
+      await setWeekGoal(goal);
+      loadWeek();
+    });
+
+  const pause = (weeks: 1 | 2 | 4 | null) =>
+    run('pause', async () => {
+      await startPause(weeks);
+      loadWeek();
+    });
+
+  const unpause = () =>
+    run('pause', async () => {
+      await stopPause();
+      loadWeek();
+    });
+
+  const exportData = (format: 'json' | 'html') =>
+    run(`export-${format}`, async () => {
+      if (!me) return;
+      const [archive, plans, dates] = await Promise.all([fetchArchive(), fetchPlans(), fetchImportantDates()]);
+      const data = buildExport({ meId: me.id, myName: me.display_name, partnerName: partner?.display_name ?? null, archive, plans, dates });
+      const name = exportFileName(format, amsterdamDay());
+      if (format === 'json') await shareExportFile(name, JSON.stringify(data, null, 2), 'application/json');
+      else await shareExportFile(name, exportHtml(data), 'text/html');
+    });
 
   const confirmUnlink = () =>
     Alert.alert(
@@ -209,7 +259,7 @@ export default function Ik() {
         <AppText variant="large">Meldingen</AppText>
         <NotifySwitch
           label="De vraag van vandaag staat klaar"
-          hint="Elke ochtend om 9 uur"
+          hint={`Elke dag om ${hourLabel(me?.notify_hour ?? 9)}`}
           value={!!me?.notify_new_question}
           disabled={busy !== null}
           onChange={(v) => toggleNotify('notify_new_question', v)}
@@ -220,6 +270,18 @@ export default function Ik() {
           value={!!me?.notify_partner_answered}
           disabled={busy !== null}
           onChange={(v) => toggleNotify('notify_partner_answered', v)}
+        />
+        <AppText accessibilityLiveRegion="polite">Meldtijd: {hourLabel(me?.notify_hour ?? 9)} (Nederlandse tijd)</AppText>
+        <Row gap={spacing.sm} wrap>
+          <Button kind="secondary" label="Eerder" onPress={() => changeHour(-1)} disabled={busy !== null} accessibilityHint="Meldtijd een uur eerder" />
+          <Button kind="secondary" label="Later" onPress={() => changeHour(1)} disabled={busy !== null} accessibilityHint="Meldtijd een uur later" />
+        </Row>
+        <NotifySwitch
+          label={`"Ik denk aan je" van ${partnerName}`}
+          hint="Een seintje zonder inhoud, hoogstens één per dag"
+          value={!!me?.notify_nudges}
+          disabled={busy !== null}
+          onChange={(v) => toggleNotify('notify_nudges', v)}
         />
         <NotifySwitch
           label="Herinneringen aan belangrijke datums"
@@ -233,6 +295,79 @@ export default function Ik() {
             {pushInfo}
           </AppText>
         ) : null}
+      </Card>
+
+      {week && (
+        <Card>
+          <AppText variant="large">Ons weekritme</AppText>
+          <AppText variant="small" muted>
+            Een samen-dag is een dag waarop jullie allebei de dagvraag beantwoorden. Kies samen hoeveel samen-dagen per
+            week bij jullie past. Een wijziging zien jullie allebei en geldt vanaf deze week.
+          </AppText>
+          <Row wrap>
+            {WEEK_GOALS.map((g) => (
+              <Chip
+                key={g}
+                label={String(g)}
+                active={week.chosen_goal === g}
+                onPress={() => chooseGoal(g)}
+                accessibilityLabel={`Weekdoel: ${g} samen-dagen`}
+              />
+            ))}
+          </Row>
+          <AppText variant="large" style={{ marginTop: spacing.sm }}>
+            Pauze
+          </AppText>
+          <AppText variant="small" muted>
+            Druk, op reis of even geen zin? Een gepauzeerde week telt niet mee en onderbreekt jullie ritme niet.
+          </AppText>
+          {pauseLabel(week) ? (
+            <AppText variant="small" color={colors.secondary} accessibilityLiveRegion="polite">
+              {pauseLabel(week)}
+            </AppText>
+          ) : null}
+          {week.pause_active ? (
+            <Button kind="secondary" label="Pauze uitzetten" onPress={unpause} busy={busy === 'pause'} />
+          ) : (
+            <Row wrap>
+              {PAUSE_OPTIONS.map((o) => (
+                <Button
+                  key={o.label}
+                  kind="secondary"
+                  label={o.label}
+                  onPress={() => pause(o.weeks)}
+                  disabled={busy !== null}
+                  accessibilityHint={o.weeks ? `Pauzeer jullie ritme ${o.label}` : 'Pauzeer tot een van jullie hem uitzet'}
+                />
+              ))}
+            </Row>
+          )}
+        </Card>
+      )}
+
+      <Card>
+        <AppText variant="large">Hoe gaat het met ons?</AppText>
+        <AppText variant="small" muted>
+          Elke maand in de eerste week een korte check-in. Je ziet alleen wat er veranderde.
+        </AppText>
+        <Button kind="ghost" label="Naar de check-in" onPress={() => router.push('/checkin')} />
+      </Card>
+
+      <Card>
+        <AppText variant="large">Een jaar geleden</AppText>
+        <NotifySwitch
+          label="Toon mijn antwoord van de vorige keer"
+          hint="Bij een vraag die terugkomt, na je nieuwe antwoord"
+          value={!!me?.show_year_ago}
+          disabled={busy !== null}
+          onChange={(v) =>
+            run('yearago', async () => {
+              if (!session) return;
+              await updateProfile(session.user.id, { show_year_ago: v });
+              await refresh();
+            })
+          }
+        />
       </Card>
 
       <Card>
@@ -261,6 +396,8 @@ export default function Ik() {
         <Button kind="danger" label="Ontkoppelen" onPress={confirmUnlink} busy={busy === 'unlink'} />
       </Card>
 
+      {phoneOnly && <RecoveryCard />}
+
       <Card>
         <AppText variant="large">Nieuwe telefoon?</AppText>
         <AppText muted>
@@ -269,6 +406,16 @@ export default function Ik() {
             : 'Op een nieuwe telefoon log je in met je e-mailadres, of je gebruikt een overzetcode.'}
         </AppText>
         <Button kind="secondary" label="Naar een nieuwe telefoon" onPress={() => router.push('/overzetten')} />
+      </Card>
+
+      <Card>
+        <AppText variant="large">Jullie gegevens downloaden</AppText>
+        <AppText variant="small" muted>
+          Je eigen antwoorden, die van {partnerName} op dagen dat jullie allebei antwoordden, en de reacties, plannen en
+          datums. Het bestand wordt op je telefoon gemaakt en niet op een server bewaard.
+        </AppText>
+        <Button kind="secondary" label="Download als JSON" onPress={() => exportData('json')} busy={busy === 'export-json'} />
+        <Button kind="secondary" label="Download als leesbare pagina" onPress={() => exportData('html')} busy={busy === 'export-html'} />
       </Card>
 
       <Card>
@@ -283,6 +430,7 @@ export default function Ik() {
         <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(phoneOnly, () => router.replace('/'))} />
         <Button kind="danger" label="Account verwijderen" onPress={confirmDelete} busy={busy === 'delete'} />
       </View>
+      <HelpLink />
     </Screen>
   );
 }

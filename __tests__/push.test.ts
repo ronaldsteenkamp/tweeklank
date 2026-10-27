@@ -2,9 +2,10 @@ import {
   chunk,
   dateReminderMessages,
   invalidTokens,
-  isAmsterdamHour,
+  amsterdamHour,
   isExpoPushToken,
   newQuestionMessages,
+  nudgeMessages,
   partnerAnsweredMessages,
 } from '../supabase/functions/_shared/push';
 
@@ -43,11 +44,23 @@ describe('pushmeldingen', () => {
     expect(invalidTokens(msgs, tickets)).toEqual(['ExponentPushToken[b]']);
   });
 
-  it('9 uur in Amsterdam, zomer en winter', () => {
-    expect(isAmsterdamHour(new Date('2026-01-10T08:00:00Z'), 9)).toBe(true);
-    expect(isAmsterdamHour(new Date('2026-01-10T07:00:00Z'), 9)).toBe(false);
-    expect(isAmsterdamHour(new Date('2026-07-10T07:00:00Z'), 9)).toBe(true);
-    expect(isAmsterdamHour(new Date('2026-07-10T08:00:00Z'), 9)).toBe(false);
+  it('rekent het uur om naar Amsterdam, zomer en winter', () => {
+    expect(amsterdamHour(new Date('2026-01-10T08:00:00Z'))).toBe(9);
+    expect(amsterdamHour(new Date('2026-07-10T07:00:00Z'))).toBe(9);
+    expect(amsterdamHour(new Date('2026-07-10T22:00:00Z'))).toBe(0);
+    // klok terug op 25 oktober 2026: 00:00 en 01:00 UTC zijn allebei 2 uur in Amsterdam
+    expect(amsterdamHour(new Date('2026-10-25T00:00:00Z'))).toBe(2);
+    expect(amsterdamHour(new Date('2026-10-25T01:00:00Z'))).toBe(2);
+    // klok vooruit op 29 maart 2026: 2 uur bestaat niet, 01:00 UTC is meteen 3 uur
+    expect(amsterdamHour(new Date('2026-03-29T00:00:00Z'))).toBe(1);
+    expect(amsterdamHour(new Date('2026-03-29T01:00:00Z'))).toBe(3);
+  });
+
+  it('"Ik denk aan je" bevat alleen de naam, nooit iets over antwoorden', () => {
+    const [m] = nudgeMessages([{ token: 'ExponentPushToken[abc]', sender_name: 'Sam' }, { token: 'ongeldig', sender_name: 'X' }].slice(0, 2));
+    expect(m.title).toBe('Sam denkt aan je');
+    expect(`${m.title} ${m.body}`).not.toMatch(/antwoord|nog niet/i);
+    expect(nudgeMessages([{ token: 'ongeldig', sender_name: 'X' }])).toEqual([]);
   });
 
   it('maakt datumherinneringen', () => {

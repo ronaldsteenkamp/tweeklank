@@ -6,7 +6,7 @@ import { addPlan, fetchDateIdeas } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
 import { minutesLabel } from '@/lib/exercises';
 import { useSession } from '@/lib/session';
-import { BUDGET_LABEL, BUDGETS, filterIdeas, type Budget, type DateIdea, type Setting } from '@/lib/together';
+import { BUDGET_LABEL, BUDGETS, filterIdeas, SETTING_LABEL, type Budget, type DateIdea, type Setting } from '@/lib/together';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export default function Ideeen() {
@@ -52,6 +52,7 @@ export default function Ideeen() {
         <Chip label="Alles" active={setting === null} onPress={() => setSetting(null)} accessibilityLabel="Waar: alles" />
         <Chip label="Binnen" active={setting === 'binnen'} onPress={() => setSetting('binnen')} />
         <Chip label="Buiten" active={setting === 'buiten'} onPress={() => setSetting('buiten')} />
+        <Chip label="Op afstand" active={setting === 'op afstand'} onPress={() => setSetting('op afstand')} />
       </Row>
       <ErrorText message={error} />
       <AppText variant="small" muted accessibilityLiveRegion="polite">
@@ -60,7 +61,7 @@ export default function Ideeen() {
       {shown.map((idea) => (
         <Card key={idea.slug}>
           <AppText variant="label" color={colors.secondary}>
-            {BUDGET_LABEL[idea.budget]} · {idea.setting === 'binnen' ? 'Binnen' : 'Buiten'} · {minutesLabel(idea.minutes)}
+            {BUDGET_LABEL[idea.budget]} · {SETTING_LABEL[idea.setting]} · {minutesLabel(idea.minutes)}
           </AppText>
           <AppText variant="large">{idea.title}</AppText>
           <AppText muted>{idea.description}</AppText>

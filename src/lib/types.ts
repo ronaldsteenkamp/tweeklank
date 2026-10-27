@@ -7,6 +7,10 @@ export type Profile = {
   notify_dates: boolean;
   explicit_opt_in: boolean;
   adult_confirmed_at: string | null;
+  show_year_ago: boolean;
+  notify_nudges: boolean;
+  notify_hour: number;
+  recovery_card_seen: boolean;
 };
 
 export type TodayQuestion = {
@@ -16,7 +20,15 @@ export type TodayQuestion = {
   depth: 1 | 2 | 3;
   answered: boolean;
   partner_answered: boolean;
+  /** reeks in weken (zie src/lib/rhythm.ts) */
   streak: number;
+  /** dag waarop jullie deze vraag de vorige keer kregen, of null */
+  repeat_of: string | null;
+  /** themaweek: titel, intro, stap 1–7 en de afsluitende oefening (anders null) */
+  series_title: string | null;
+  series_intro: string | null;
+  series_step: number | null;
+  series_exercise_slug: string | null;
 };
 
 export type Reaction = {

@@ -45,6 +45,13 @@ export function newQuestionMessages(tokens: string[]): PushMessage[] {
     .map((t) => message(t, 'De vraag van vandaag staat klaar', 'Neem even de tijd voor elkaar.', '/vandaag'));
 }
 
+/** "Ik denk aan je": alleen de naam van de verzender, nooit iets over (niet) antwoorden. */
+export function nudgeMessages(targets: { token: string; sender_name: string }[]): PushMessage[] {
+  return targets
+    .filter((t) => isExpoPushToken(t.token))
+    .map((t) => message(t.token, `${t.sender_name} denkt aan je`, 'Zomaar een klein seintje.', '/vandaag'));
+}
+
 /** Tokens die Expo als niet (meer) geregistreerd meldt; die ruimen we op. */
 export function invalidTokens(messages: PushMessage[], tickets: PushTicket[]): string[] {
   return tickets.flatMap((ticket, i) =>
@@ -52,10 +59,10 @@ export function invalidTokens(messages: PushMessage[], tickets: PushTicket[]): s
   );
 }
 
-/** Is het op dit moment het opgegeven uur in Amsterdam? (cron draait in UTC, dus om zomer-/wintertijd heen) */
-export function isAmsterdamHour(at: Date, hour: number): boolean {
+/** Het uur (0–23) in Amsterdam op een tijdstip. Cron draait in UTC; zo volgen we zomer- en wintertijd. */
+export function amsterdamHour(at: Date): number {
   const h = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).format(at);
-  return Number(h) === hour;
+  return Number(h) % 24;
 }
 
 /** Herinnering aan een belangrijke datum, bijv. "Over 7 dagen: Jubileum". */

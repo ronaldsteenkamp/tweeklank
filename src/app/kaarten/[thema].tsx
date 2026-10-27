@@ -1,13 +1,16 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, Switch, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, FlatList, Pressable, Switch, useWindowDimensions, View } from 'react-native';
+import { HelpLink } from '@/components/HelpLink';
 import { AppText, Button, Chip, DEPTH_LABEL, ErrorText, Loading, Row, Screen } from '@/components/ui';
 import { fetchCardMarks, fetchTheme, setCardMark, type ThemeDetail } from '@/lib/api';
 import {
+  applyOrder,
   clampIndex,
   DEFAULT_FILTER,
   filterCards,
   isMarked,
+  shuffleIds,
   type CardFilter,
   type CardMark,
   type CardQuestion,
@@ -29,6 +32,8 @@ export default function ThemaKaarten() {
   const [marks, setMarks] = useState<CardMark[]>([]);
   const [filter, setFilter] = useState<CardFilter>(DEFAULT_FILTER);
   const [index, setIndex] = useState(0);
+  // Geschudde volgorde: alleen lokaal en zolang dit scherm open is
+  const [order, setOrder] = useState<number[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<FlatList<CardQuestion>>(null);
 
@@ -41,7 +46,10 @@ export default function ThemaKaarten() {
       .catch((e) => setError(friendlyError(e)));
   }, [thema]);
 
-  const cards = useMemo(() => (theme ? filterCards(theme.theme_questions, marks, filter) : []), [theme, marks, filter]);
+  const cards = useMemo(
+    () => (theme ? applyOrder(filterCards(theme.theme_questions, marks, filter), order) : []),
+    [theme, marks, filter, order],
+  );
   const current = clampIndex(index, cards.length);
 
   const goTo = useCallback(
@@ -57,6 +65,14 @@ export default function ThemaKaarten() {
     setFilter((f) => ({ ...f, ...patch }));
     setIndex(0);
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  };
+
+  const shuffle = () => {
+    if (!theme) return;
+    setOrder(shuffleIds(theme.theme_questions.map((q) => q.id)));
+    setIndex(0);
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    AccessibilityInfo.announceForAccessibility('Kaarten geschud');
   };
 
   const toggle = async (question: CardQuestion, kind: MarkKind) => {
@@ -89,6 +105,9 @@ export default function ThemaKaarten() {
             return <Chip key={d} label={label} active={active} onPress={() => changeFilter({ depth: d })} accessibilityLabel={`Diepgang: ${label}`} />;
           })}
         </Row>
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Button kind="secondary" label="Schud" onPress={shuffle} accessibilityHint="Zet de kaarten in een willekeurige volgorde" />
+        </View>
         <FilterSwitch label="Verberg besproken" value={filter.hideDiscussed} onChange={(v) => changeFilter({ hideDiscussed: v })} />
         <FilterSwitch label="Alleen favorieten" value={filter.onlyFavorites} onChange={(v) => changeFilter({ onlyFavorites: v })} />
         <ErrorText message={error} />
@@ -162,6 +181,11 @@ export default function ThemaKaarten() {
             </Row>
           </View>
         </>
+      )}
+      {theme.slug === 'th-onenigheid' && (
+        <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg }}>
+          <HelpLink />
+        </View>
       )}
     </Screen>
   );

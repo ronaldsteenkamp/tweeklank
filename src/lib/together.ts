@@ -2,12 +2,18 @@
 // nextOccurrence volgt exact dezelfde regels als public.next_occurrence in de database.
 
 export type Budget = 'gratis' | '€' | '€€' | '€€€';
-export type Setting = 'binnen' | 'buiten';
-export type DateKind = 'jubileum' | 'verjaardag' | 'anders';
+export type Setting = 'binnen' | 'buiten' | 'op afstand';
+export type DateKind = 'jubileum' | 'verjaardag' | 'anders' | 'weerzien';
 
 export const BUDGETS: Budget[] = ['gratis', '€', '€€', '€€€'];
 export const BUDGET_LABEL: Record<Budget, string> = { gratis: 'Gratis', '€': 'Goedkoop', '€€': 'Gemiddeld', '€€€': 'Uitpakken' };
-export const KIND_LABEL: Record<DateKind, string> = { jubileum: 'Jubileum', verjaardag: 'Verjaardag', anders: 'Anders' };
+export const KIND_LABEL: Record<DateKind, string> = {
+  jubileum: 'Jubileum',
+  verjaardag: 'Verjaardag',
+  weerzien: 'We zien elkaar weer',
+  anders: 'Anders',
+};
+export const SETTING_LABEL: Record<Setting, string> = { binnen: 'Binnen', buiten: 'Buiten', 'op afstand': 'Op afstand' };
 export const REMIND_OPTIONS = [0, 1, 3, 7, 14] as const;
 
 export type DateIdea = {
@@ -128,4 +134,21 @@ export function formatDateNl(iso: string): string {
   return new Intl.DateTimeFormat('nl-NL', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(
     new Date(Date.UTC(y, m - 1, d, 12)),
   );
+}
+
+/** De eerstvolgende "We zien elkaar weer" vanaf vandaag, of null. */
+export function nextReunion(dates: Pick<ImportantDate, 'kind' | 'date' | 'yearly' | 'title'>[], today: string): { title: string; days: number } | null {
+  const upcoming = dates
+    .filter((d) => d.kind === 'weerzien')
+    .map((d) => ({ title: d.title, next: nextOccurrence(d.date, d.yearly, today) }))
+    .filter((d): d is { title: string; next: string } => d.next !== null)
+    .sort((a, b) => a.next.localeCompare(b.next));
+  return upcoming[0] ? { title: upcoming[0].title, days: daysUntil(upcoming[0].next, today) } : null;
+}
+
+/** "Nog 12 dagen tot jullie elkaar weer zien" */
+export function reunionLabel(days: number): string {
+  if (days === 0) return 'Vandaag zien jullie elkaar weer';
+  if (days === 1) return 'Morgen zien jullie elkaar weer';
+  return `Nog ${days} dagen tot jullie elkaar weer zien`;
 }

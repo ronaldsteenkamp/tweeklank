@@ -109,7 +109,7 @@ export default function Datums() {
           </AppText>
           <Row wrap>
             {(Object.keys(KIND_LABEL) as DateKind[]).map((k) => (
-              <Chip key={k} label={KIND_LABEL[k]} active={draft.kind === k} onPress={() => setDraft({ ...draft, kind: k })} />
+              <Chip key={k} label={KIND_LABEL[k]} active={draft.kind === k} onPress={() => setDraft({ ...draft, kind: k, yearly: k === 'weerzien' ? false : draft.yearly })} />
             ))}
           </Row>
           <DateFields label="Datum" value={draft.date} onChange={(v) => setDraft({ ...draft, date: v })} error={dateError} />

@@ -33,7 +33,7 @@ for t in "$ROOT"/supabase/tests/*.sql; do
   echo "# $(basename "$t")"
   out="$("${PSQL[@]}" -d app -X -A -t -f "$t" 2>&1)" || status=1
   echo "$out" | grep -vE '^(\{.*\}|)$' | grep -E '^(ok|not ok|#|1\.\.)|ERROR' || true
-  if echo "$out" | grep -qE '^not ok|Looks like you failed|ERROR'; then status=1; fi
+  if echo "$out" | grep -qE '^not ok|Looks like you (failed|planned)|ERROR'; then status=1; fi
 done
 
 if [ $status -eq 0 ]; then echo "Alle databasetests geslaagd."; else echo "Er zijn databasetests mislukt." >&2; fi

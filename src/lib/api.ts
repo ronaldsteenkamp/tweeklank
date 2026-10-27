@@ -1,9 +1,15 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import type { YesterdayQuestion } from './catchup';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
+import type { Checkin, ScaleKey } from './checkin';
+import type { NudgeStatus } from './nudge';
+import type { WeekStatus } from './rhythm';
+import type { SeriesOffer } from './series';
+import type { YearAgoAnswer } from './yearAgo';
 import type { Answer, ArchiveDay, Profile, TodayQuestion } from './types';
 
 function unwrap<T>({ data, error }: { data: T | null; error: unknown }): T {
@@ -78,11 +84,119 @@ export async function redeemTransferCode(code: string): Promise<void> {
   if (verifyError) throw verifyError;
 }
 
+/** Herstelcode van 16 tekens om te bewaren; een eerdere vervalt. */
+export async function createRecoveryCode(): Promise<string> {
+  return unwrap(await supabase.rpc('create_recovery_code')) as string;
+}
+
+export async function hasRecoveryCode(): Promise<boolean> {
+  return !!unwrap(await supabase.rpc('has_recovery_code'));
+}
+
 // ---- Dagelijkse vraag ----
 
 export async function fetchToday(): Promise<TodayQuestion> {
   const rows = unwrap(await supabase.rpc('get_today_question')) as TodayQuestion[];
   return rows[0];
+}
+
+/** De vraag van gisteren (alleen als die gisteren al aan jullie was toegewezen), anders null. */
+export async function fetchYesterday(): Promise<YesterdayQuestion | null> {
+  const rows = unwrap(await supabase.rpc('get_yesterday_question')) as YesterdayQuestion[];
+  return rows[0] ?? null;
+}
+
+/** De antwoorden van de vorige keer bij een terugkerende vraag (alleen na je eigen nieuwe antwoord). */
+export async function fetchYearAgo(day: string): Promise<YearAgoAnswer[]> {
+  return unwrap(await supabase.rpc('get_year_ago', { p_day: day })) as YearAgoAnswer[];
+}
+
+// ---- Themaweken ----
+
+export async function fetchSeriesOffer(): Promise<SeriesOffer[]> {
+  return unwrap(await supabase.rpc('get_series_offer')) as SeriesOffer[];
+}
+
+/** Geeft 'gestart' als jullie allebei deze serie kozen, anders 'wacht'. */
+export async function chooseSeries(seriesId: number): Promise<'gestart' | 'wacht'> {
+  return unwrap(await supabase.rpc('choose_series', { p_series: seriesId })) as 'gestart' | 'wacht';
+}
+
+export async function dismissSeriesOffer(): Promise<void> {
+  unwrap(await supabase.rpc('dismiss_series_offer', { p_snooze: true }));
+}
+
+// ---- Ik denk aan je ----
+
+export async function fetchNudgeStatus(): Promise<NudgeStatus | null> {
+  const rows = unwrap(await supabase.rpc('nudge_status')) as NudgeStatus[];
+  return rows[0] ?? null;
+}
+
+export async function sendNudge(): Promise<void> {
+  unwrap(await supabase.rpc('send_nudge'));
+}
+
+// ---- Solo-modus ----
+
+export async function fetchSoloCardDue(): Promise<boolean> {
+  return !!unwrap(await supabase.rpc('solo_card_due'));
+}
+
+export async function dismissSoloCard(): Promise<void> {
+  unwrap(await supabase.rpc('dismiss_solo_card'));
+}
+
+// ---- Maandelijkse check-in ----
+
+/** Eerste dag van de maand als de check-in nu open is (dag 1 t/m 7), anders null. */
+export async function fetchCheckinOpenMonth(): Promise<string | null> {
+  return (unwrap(await supabase.rpc('checkin_open_month')) as string | null) ?? null;
+}
+
+/** Check-ins die je mag zien (RLS: die van je partner pas na je eigen check-in van die maand). */
+export async function fetchCheckins(): Promise<Checkin[]> {
+  return unwrap(
+    await supabase.from('checkins').select('id, user_id, month, connection, appreciated, conflict, time_together, wish').order('month', { ascending: false }).limit(12),
+  ) as Checkin[];
+}
+
+export async function saveCheckin(params: {
+  coupleId: string;
+  userId: string;
+  month: string;
+  values: Record<ScaleKey, number>;
+  wish: string;
+}): Promise<void> {
+  unwrap(
+    await supabase.from('checkins').insert({
+      couple_id: params.coupleId,
+      user_id: params.userId,
+      month: params.month,
+      ...params.values,
+      wish: params.wish.trim() || null,
+    }),
+  );
+}
+
+// ---- Weekritme ----
+
+export async function fetchWeek(): Promise<WeekStatus | null> {
+  const rows = unwrap(await supabase.rpc('my_week')) as WeekStatus[];
+  return rows[0] ?? null;
+}
+
+export async function setWeekGoal(goal: number): Promise<void> {
+  unwrap(await supabase.rpc('set_week_goal', { p_goal: goal }));
+}
+
+/** weeks = null: pauze tot een van jullie hem uitzet */
+export async function startPause(weeks: 1 | 2 | 4 | null): Promise<void> {
+  unwrap(await supabase.rpc('start_pause', { p_weeks: weeks }));
+}
+
+export async function stopPause(): Promise<void> {
+  unwrap(await supabase.rpc('stop_pause'));
 }
 
 const ANSWER_FIELDS = 'id, user_id, day, body, created_at, updated_at, answer_reactions(id, answer_id, user_id, emoji, message, created_at)';
