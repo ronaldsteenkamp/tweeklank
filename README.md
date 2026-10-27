@@ -243,6 +243,21 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Overzetcodes en herstelcodes.** Een overzetcode is 15 minuten en één keer geldig. Een herstelcode heeft 16 tekens, is lang geldig en werkt één keer. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
 - **Export op het toestel.** De export (JSON of HTML) wordt op de telefoon gemaakt en via het deelmenu gedeeld. Er blijft geen kopie op een server.
 
+## Thuisschermwidget (iOS en Android)
+
+De widget toont *"Vraag van vandaag staat klaar"* of *"Jullie hebben allebei geantwoord"*, *"[naam] heeft geantwoord"* en eventueel de aftelteller tot het weerzien. Hij toont **nooit** de tekst van een antwoord. De vraag zelf staat er alleen op als je dat aanzet onder **Ik → Thuisschermwidget** (standaard uit, alleen op dat toestel bewaard).
+
+**Hoe het werkt**
+- Het gebruikt `expo-widgets` (SDK 58) met `@expo/ui`. De layout staat in `src/widgets/TweeklankWidget.ios.tsx` (SwiftUI) en `TweeklankWidget.android.tsx` (Jetpack Compose).
+- De app geeft de gegevens door met `updateSnapshot`, via de gedeelde app-groep `group.nl.tweeklank.app` op iOS en de opslag van de widget op Android. De widget doet zelf geen netwerkverzoek. Hij wordt dus bijgewerkt als je de app opent.
+- **Gescheiden van de rest:** de config-plugin staat in `app.config.js` en staat alleen aan als `TWEEKLANK_WIDGETS=1` is gezet. Dat gebeurt in alle profielen in `eas.json`. `src/lib/widget.ts` laadt de widget alleen als de native module bestaat. In Expo Go en in de webversie gebeurt er dus niets.
+
+**Bouwen**
+1. Development build: `npx eas-cli build --profile development --platform ios` (of `android`). Lokaal kan ook: `TWEEKLANK_WIDGETS=1 npx expo run:ios`.
+2. Installeer de build, open de app één keer en log in. De widget krijgt zijn layout pas als de app een keer heeft gedraaid.
+3. Voeg de widget toe vanuit het widgetmenu van je thuisscherm (zoek op *Tweeklank*).
+4. **iOS:** de app-groep `group.nl.tweeklank.app` moet bij je Apple Developer-account horen. EAS regelt dat bij een build met je eigen account. Pas hem in `app.config.js` aan als je een andere bundle-ID gebruikt.
+
 ## Hulppagina "Als het niet goed gaat"
 
 Een statisch scherm (`src/app/hulp.tsx`, gegevens in `src/lib/help.ts`). Je vindt het via een kleine link onder **Ik**, onderaan **Oefeningen** en bij het kaartthema **Onenigheid**. Er wordt niets opgeslagen, er gaat geen melding uit en er is geen analyse.

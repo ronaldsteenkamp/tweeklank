@@ -38,6 +38,8 @@ import { useSession } from '@/lib/session';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
 import type { Answer, TodayQuestion } from '@/lib/types';
 import { useCoupleRealtime } from '@/lib/useCoupleRealtime';
+import { getWidgetShowsQuestion, updateHomeWidget, widgetAvailable } from '@/lib/widget';
+import { widgetProps } from '@/lib/widgetData';
 import type { YearAgoAnswer } from '@/lib/yearAgo';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -61,6 +63,9 @@ export default function Vandaag() {
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const meId = me?.id;
+  const widgetPartnerName = partner?.display_name || 'Je partner';
 
   const load = useCallback(async () => {
     try {
@@ -87,15 +92,28 @@ export default function Vandaag() {
       setOffers(o);
       setSolo(s);
       setReunion(nextReunion(dates, q.day));
-      setCheckinOpen(!!month && !checkins.some((c) => c.month === month && c.user_id === me?.id));
+      setCheckinOpen(!!month && !checkins.some((c) => c.month === month && c.user_id === meId));
       setAnniversary(start ? anniversaryToday(start, q.day) : 0);
       setError(null);
+      if (widgetAvailable()) {
+        const upcoming = nextReunion(dates, q.day);
+        updateHomeWidget(
+          widgetProps({
+            answered: q.answered,
+            partnerAnswered: q.partner_answered,
+            partnerName: widgetPartnerName,
+            questionText: q.text,
+            showQuestion: await getWidgetShowsQuestion(),
+            countdown: upcoming ? reunionLabel(upcoming.days) : null,
+          }),
+        );
+      }
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
       if (String((e as { message?: string })?.message).includes('geen_partner')) await refresh();
       else setError(friendlyError(e));
     }
-  }, [refresh, me?.id]);
+  }, [refresh, meId, widgetPartnerName]);
 
   useFocusEffect(
     useCallback(() => {

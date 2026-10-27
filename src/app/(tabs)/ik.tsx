@@ -15,6 +15,7 @@ import { registerForPush, unregisterPush } from '@/lib/push';
 import { hourLabel, shiftHour } from '@/lib/nudge';
 import { PAUSE_OPTIONS, pauseLabel, WEEK_GOALS, type WeekStatus } from '@/lib/rhythm';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
+import { clearHomeWidget, getWidgetShowsQuestion, setWidgetShowsQuestion, widgetAvailable } from '@/lib/widget';
 import { useTheme, type ThemePref } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -41,6 +42,13 @@ export default function Ik() {
       .catch(() => setWeek(null));
   }, []);
   useFocusEffect(loadWeek);
+
+  const [widgetQuestion, setWidgetQuestion] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      getWidgetShowsQuestion().then(setWidgetQuestion);
+    }, []),
+  );
 
   const partnerName = partner?.display_name || 'je partner';
   const phoneOnly = isPhoneOnlyAccount(session?.user);
@@ -166,6 +174,7 @@ export default function Ik() {
           onPress: () =>
             run('unlink', async () => {
               await leaveCouple();
+              clearHomeWidget();
               await refresh();
               router.replace('/');
             }),
@@ -186,6 +195,7 @@ export default function Ik() {
             run('delete', async () => {
               await unregisterPush();
               await deleteAccount();
+              clearHomeWidget();
               await signOut();
               router.replace('/');
             }),
@@ -361,6 +371,25 @@ export default function Ik() {
         <Button kind="ghost" label="Bekijk ons jaar" onPress={() => router.push('/ons-jaar')} />
       </Card>
 
+      {widgetAvailable() && (
+        <Card>
+          <AppText variant="large">Thuisschermwidget</AppText>
+          <AppText variant="small" muted>
+            De widget laat zien of de vraag van vandaag klaarstaat en of {partnerName} heeft geantwoord. Nooit de inhoud van
+            een antwoord.
+          </AppText>
+          <NotifySwitch
+            label="Toon ook de vraag zelf"
+            hint="Iedereen die je thuisscherm ziet, kan de vraag dan lezen"
+            value={widgetQuestion}
+            onChange={(v) => {
+              setWidgetQuestion(v);
+              setWidgetShowsQuestion(v);
+            }}
+          />
+        </Card>
+      )}
+
       <Card>
         <AppText variant="large">Een jaar geleden</AppText>
         <NotifySwitch
@@ -435,7 +464,10 @@ export default function Ik() {
       <ErrorText message={error} />
 
       <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-        <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(phoneOnly, () => router.replace('/'))} />
+        <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(phoneOnly, () => {
+          clearHomeWidget();
+          router.replace('/');
+        })} />
         <Button kind="danger" label="Account verwijderen" onPress={confirmDelete} busy={busy === 'delete'} />
       </View>
       <HelpLink />
