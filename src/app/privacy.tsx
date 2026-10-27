@@ -6,6 +6,7 @@ const ITEMS: [string, string][] = [
   ['Niet spieken', 'Het antwoord van je partner op de dagvraag, de quizantwoorden en de maandelijkse check-in zie je pas nadat je zelf hebt geantwoord. Ook dat regelt de database, niet alleen de app.'],
   ['18+-kaarten', 'De 18+-set is alleen zichtbaar als jullie hem allebei aanzetten en bevestigen dat je 18 jaar of ouder bent. Zet een van jullie hem uit, dan verdwijnt hij direct voor allebei.'],
   ['Wat we niet doen', 'Geen advertenties, geen analytics- of trackingdiensten, geen verkoop of delen van gegevens.'],
+  ['Ons jaar', 'Het jaaroverzicht wordt op je telefoon gemaakt uit wat jullie al konden zien. We bewaren alleen of jullie allebei toestemming geven om dat overzicht als afbeelding te delen. Zonder toestemming van allebei kun je het alleen zelf bekijken.'],
   ['Samen kaarten spelen', 'Als jullie samen kaarten spelen, bewaren we alleen welke kaart er open ligt, zodat jullie allebei dezelfde zien. Die sessie wordt gewist als een van jullie stopt, en anders na twee uur.'],
   ['Ontkoppelen', 'Bij ontkoppelen worden alle gedeelde gegevens van jullie koppel definitief verwijderd, voor jullie allebei.'],
   ['Nieuwe telefoon', 'Met een overzetcode (Ik → Naar een nieuwe telefoon) neem je je account mee. De code is 15 minuten en één keer geldig, en in de database staat alleen een onleesbare versie (hash) ervan. Een account zonder e-mail krijgt daarbij een intern adres dat niet bestaat; daar wordt nooit iets naartoe gestuurd.'],

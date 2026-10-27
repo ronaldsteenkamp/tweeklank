@@ -354,6 +354,14 @@ export default function Ik() {
       </Card>
 
       <Card>
+        <AppText variant="large">Ons jaar</AppText>
+        <AppText variant="small" muted>
+          Een overzicht van jullie jaar, gemaakt op je telefoon: samen-dagen, hartjes, plannen en favoriete kaarten.
+        </AppText>
+        <Button kind="ghost" label="Bekijk ons jaar" onPress={() => router.push('/ons-jaar')} />
+      </Card>
+
+      <Card>
         <AppText variant="large">Een jaar geleden</AppText>
         <NotifySwitch
           label="Toon mijn antwoord van de vorige keer"

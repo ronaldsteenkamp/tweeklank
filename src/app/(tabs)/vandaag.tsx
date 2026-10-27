@@ -10,10 +10,26 @@ import { SoloCard } from '@/components/SoloCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { dismissSoloCard, fetchAnswers, fetchImportantDates, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer, updateProfile } from '@/lib/api';
+import {
+  dismissSoloCard,
+  fetchAnswers,
+  fetchCheckinOpenMonth,
+  fetchCheckins,
+  fetchCoupleStart,
+  fetchImportantDates,
+  fetchSeriesOffer,
+  fetchSoloCardDue,
+  fetchToday,
+  fetchWeek,
+  fetchYearAgo,
+  fetchYesterday,
+  saveAnswer,
+  updateProfile,
+} from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
+import { anniversaryToday } from '@/lib/ourYear';
 import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhythm';
 import { showRecoveryCard } from '@/lib/recovery';
 import { nextReunion, reunionLabel } from '@/lib/together';
@@ -38,6 +54,7 @@ export default function Vandaag() {
   const [solo, setSolo] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [reunion, setReunion] = useState<{ title: string; days: number } | null>(null);
+  const [anniversary, setAnniversary] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -49,23 +66,29 @@ export default function Vandaag() {
     try {
       const q = await fetchToday();
       setToday(q);
-      // Weekritme en gisteren zijn extra's: als die (nog) niet laden, werkt de vraag van vandaag gewoon
-      const [a, w, y] = await Promise.all([
+      // Alles naast de vraag van vandaag is een extra: als iets (nog) niet laadt, werkt de vraag gewoon
+      const [a, w, y, ago, o, s, dates, month, checkins, start] = await Promise.all([
         fetchAnswers(q.day),
         fetchWeek().catch(() => null),
         fetchYesterday().catch(() => null),
+        q.repeat_of && q.answered ? fetchYearAgo(q.day).catch(() => []) : Promise.resolve([]),
+        fetchSeriesOffer().catch(() => []),
+        fetchSoloCardDue().catch(() => false),
+        fetchImportantDates().catch(() => []),
+        fetchCheckinOpenMonth().catch(() => null),
+        fetchCheckins().catch(() => []),
+        fetchCoupleStart().catch(() => null),
       ]);
       setAnswers(a);
       setWeek(w);
       setYesterday(y);
       setYesterdayAnswers(y && yesterdayView(y) === 'ingehaald' ? await fetchAnswers(y.day) : []);
-      setYearAgo(q.repeat_of && q.answered ? await fetchYearAgo(q.day).catch(() => []) : []);
-      setOffers(await fetchSeriesOffer().catch(() => []));
-      setSolo(await fetchSoloCardDue().catch(() => false));
-      setReunion(nextReunion(await fetchImportantDates().catch(() => []), q.day));
-      const month = await fetchCheckinOpenMonth().catch(() => null);
-      const filled = month ? (await fetchCheckins().catch(() => [])).some((c) => c.month === month && c.user_id === me?.id) : true;
-      setCheckinOpen(!!month && !filled);
+      setYearAgo(ago);
+      setOffers(o);
+      setSolo(s);
+      setReunion(nextReunion(dates, q.day));
+      setCheckinOpen(!!month && !checkins.some((c) => c.month === month && c.user_id === me?.id));
+      setAnniversary(start ? anniversaryToday(start, q.day) : 0);
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
@@ -130,6 +153,14 @@ export default function Vandaag() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
+        {anniversary > 0 && (
+          <Card tone="alt">
+            <AppText variant="large">
+              Vandaag {anniversary === 1 ? 'een jaar' : `${anniversary} jaar`} samen in Tweeklank
+            </AppText>
+            <Button kind="secondary" label="Bekijk ons jaar" onPress={() => router.push('/ons-jaar')} />
+          </Card>
+        )}
         {reunion && (
           <Card tone="alt">
             <AppText variant="large" color={colors.primary}>

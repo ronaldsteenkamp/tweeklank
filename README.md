@@ -134,6 +134,11 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
 
+**Ons jaar testen.**
+- Open **Ik → Ons jaar**, of tik op de verjaardag van jullie koppeling op de kaart op **Vandaag**. Het overzicht wordt helemaal op het toestel gemaakt. Het toont het aantal samen-dagen, de antwoorden waarop jullie allebei met een hartje reageerden, afgevinkte plannen, jullie beste quiz (samen opgeteld) en favoriete kaarten.
+- Tot 30 dagen na de verjaardag zie je het jaar dat net af is, daarna het lopende jaar.
+- **Delen als afbeelding** kan pas als jullie allebei *Ik vind delen goed* hebben gekozen, voor dit specifieke overzicht. Dat kan alleen in de app (`react-native-view-shot`), niet in de browser.
+
 **Samen kaarten spelen testen.**
 - Open op toestel 1 een thema en tik op **Speel samen**. Op toestel 2 verschijnt bij **Kaarten** *"Jullie spelen samen: …"*. Tik op *Doe mee*.
 - Wie op *Vorige*, *Volgende* of *Schud* tikt, neemt de ander live mee (Realtime). Er ligt steeds één kaart open; er wordt geen geschiedenis bewaard.
