@@ -24,7 +24,7 @@ Alles is zelf geschreven, in het Nederlands.
 
 | Onderdeel | Aantal |
 |---|---|
-| Dagelijkse vragen | 60 |
+| Dagelijkse vragen | 120 (45% luchtig, 35% persoonlijk, 20% diep) |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
 | Oefeningen | 12 |
@@ -152,7 +152,7 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 npm test                # Jest: datum/tijdzone, codes, kleurcontrast (WCAG AA), meldingen, quiz, kaarten, plannen
 npm run typecheck       # TypeScript
 npm run lint            # ESLint (eslint-config-expo)
-npm run check:content   # aantallen, opties en dubbele vragen in de startcontent
+npm run check:content   # aantallen, (bijna) dubbele vragen, gegenderde woorden en de diepgangsverdeling
 npm run test:db         # pgTAP: alle RLS-regels en databaselogica (lokale PostgreSQL + pgTAP, geen Docker nodig)
 ```
 
@@ -210,6 +210,11 @@ insert into public.daily_questions (slug, position, depth, text) values
 on conflict (slug) do nothing;
 ```
 
-Draai daarna `npx supabase db push` en `npm run check:content`.
+Draai daarna `npx supabase db push` en `npm run check:content`. De contentcheck controleert:
+- **(bijna) dubbele dagvragen**, ook tegen de bestaande (overlap van inhoudswoorden, `scripts/content-rules.js`);
+- **gegenderde woorden** zoals *hij of zij*, *hem of haar*, *vriend*, *man* of *vrouw*, in de content en in de app. Schrijf *je partner* of *de ander*;
+- **de diepgangsverdeling** van de dagvragen: ongeveer 45% luchtig, 35% persoonlijk en 20% diep, in totaal en per portie van 60.
+
+Een bestaande tekst aanpassen? Gebruik een `update … where slug = …;` op één regel, zoals in `…_inclusief.sql`. De contentcheck leest die updates mee.
 
 Het werkt hetzelfde voor quizzen (`quizzes`, `quiz_questions`), kaarten (`themes`, `theme_questions`), oefeningen (`exercises`) en date-ideeën (`date_ideas`). Kijk naar de bestaande `…_content_….sql`-migraties als voorbeeld.
