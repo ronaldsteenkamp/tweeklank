@@ -134,6 +134,11 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
 
+**Samen kaarten spelen testen.**
+- Open op toestel 1 een thema en tik op **Speel samen**. Op toestel 2 verschijnt bij **Kaarten** *"Jullie spelen samen: …"*. Tik op *Doe mee*.
+- Wie op *Vorige*, *Volgende* of *Schud* tikt, neemt de ander live mee (Realtime). Er ligt steeds één kaart open; er wordt geen geschiedenis bewaard.
+- De sessie stopt na twee uur vanzelf, of als een van jullie op *Stoppen met samen spelen* tikt. Verlopen sessies worden bij de volgende actie gewist. 18+-kaarten blijven alleen beschikbaar met dubbele toestemming.
+
 **Samen plannen testen.**
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.

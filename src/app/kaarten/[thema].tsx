@@ -2,8 +2,9 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, FlatList, Pressable, Switch, useWindowDimensions, View } from 'react-native';
 import { HelpLink } from '@/components/HelpLink';
+import { TogetherCard } from '@/components/TogetherCard';
 import { AppText, Button, Chip, DEPTH_LABEL, ErrorText, Loading, Row, Screen } from '@/components/ui';
-import { fetchCardMarks, fetchTheme, setCardMark, type ThemeDetail } from '@/lib/api';
+import { fetchCardMarks, fetchTheme, setCardMark, showCardTogether, type ThemeDetail } from '@/lib/api';
 import {
   applyOrder,
   clampIndex,
@@ -18,6 +19,7 @@ import {
 } from '@/lib/cards';
 import { friendlyError } from '@/lib/errors';
 import { useSession } from '@/lib/session';
+import { useCardSession } from '@/lib/useCardSession';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -27,7 +29,8 @@ export default function ThemaKaarten() {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const { thema } = useLocalSearchParams<{ thema: string }>();
-  const { me, coupleId } = useSession();
+  const { me, partner, coupleId } = useSession();
+  const { session: playing } = useCardSession(coupleId);
   const [theme, setTheme] = useState<ThemeDetail | null | undefined>(undefined);
   const [marks, setMarks] = useState<CardMark[]>([]);
   const [filter, setFilter] = useState<CardFilter>(DEFAULT_FILTER);
@@ -75,6 +78,16 @@ export default function ThemaKaarten() {
     AccessibilityInfo.announceForAccessibility('Kaarten geschud');
   };
 
+  const playTogether = async () => {
+    const first = cards[current] ?? cards[0];
+    if (!first) return;
+    try {
+      await showCardTogether(first.id);
+    } catch (e) {
+      setError(friendlyError(e));
+    }
+  };
+
   const toggle = async (question: CardQuestion, kind: MarkKind) => {
     if (!me || !coupleId) return;
     const on = !isMarked(marks, question.id, kind);
@@ -93,6 +106,8 @@ export default function ThemaKaarten() {
   if (!theme) return <Screen><ErrorText message={error ?? 'Dit thema bestaat niet (of is niet zichtbaar voor jullie).'} /></Screen>;
 
   const cardWidth = width - spacing.lg * 2;
+  const together = !!playing && playing.theme_id === theme.id;
+  const partnerName = partner?.display_name || 'Je partner';
 
   return (
     <Screen padded={false}>
@@ -105,15 +120,29 @@ export default function ThemaKaarten() {
             return <Chip key={d} label={label} active={active} onPress={() => changeFilter({ depth: d })} accessibilityLabel={`Diepgang: ${label}`} />;
           })}
         </Row>
-        <View style={{ alignSelf: 'flex-start' }}>
-          <Button kind="secondary" label="Schud" onPress={shuffle} accessibilityHint="Zet de kaarten in een willekeurige volgorde" />
-        </View>
+        {!together && (
+          <Row wrap>
+            <Button kind="secondary" label="Schud" onPress={shuffle} accessibilityHint="Zet de kaarten in een willekeurige volgorde" />
+            <Button
+              kind="secondary"
+              label="Speel samen"
+              onPress={playTogether}
+              accessibilityHint={`${partnerName} volgt live dezelfde kaart, ook op afstand`}
+            />
+          </Row>
+        )}
         <FilterSwitch label="Verberg besproken" value={filter.hideDiscussed} onChange={(v) => changeFilter({ hideDiscussed: v })} />
         <FilterSwitch label="Alleen favorieten" value={filter.onlyFavorites} onChange={(v) => changeFilter({ onlyFavorites: v })} />
         <ErrorText message={error} />
       </View>
 
-      {cards.length === 0 ? (
+      {together ? (
+        <TogetherCard
+          question={theme.theme_questions.find((q) => q.id === playing?.question_id)}
+          cards={cards}
+          partnerName={partnerName}
+        />
+      ) : cards.length === 0 ? (
         <View style={{ padding: spacing.lg }}>
           <AppText muted>
             {filter.onlyFavorites

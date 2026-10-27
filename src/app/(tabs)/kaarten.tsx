@@ -2,10 +2,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { AppText, ErrorText, Pill, Row, Screen } from '@/components/ui';
+import { AppText, Button, Card, ErrorText, Pill, Row, Screen } from '@/components/ui';
 import { fetchCardMarks, fetchThemes, type ThemeSummary } from '@/lib/api';
 import { progress, type CardMark } from '@/lib/cards';
 import { friendlyError } from '@/lib/errors';
+import { useSession } from '@/lib/session';
+import { useCardSession } from '@/lib/useCardSession';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
@@ -14,6 +16,9 @@ export default function Kaarten() {
   const [themes, setThemes] = useState<ThemeSummary[] | null>(null);
   const [marks, setMarks] = useState<CardMark[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { partner, coupleId } = useSession();
+  const { session: playing } = useCardSession(coupleId);
+  const playingTheme = playing ? themes?.find((t) => t.id === playing.theme_id) : undefined;
 
   useFocusEffect(
     useCallback(() => {
@@ -31,6 +36,19 @@ export default function Kaarten() {
     <Screen>
       <AppText variant="title">Gesprekskaarten</AppText>
       <AppText muted>Kies een thema, pak er een rustig moment bij en neem om de beurt een kaart.</AppText>
+      {playingTheme && (
+        <Card tone="alt">
+          <AppText variant="large" accessibilityLiveRegion="polite">
+            Jullie spelen samen: {playingTheme.name}
+          </AppText>
+          <AppText muted>Open het thema om dezelfde kaart te zien als {partner?.display_name || 'je partner'}.</AppText>
+          <Button
+            kind="secondary"
+            label="Doe mee"
+            onPress={() => router.push({ pathname: '/kaarten/[thema]', params: { thema: playingTheme.slug } })}
+          />
+        </Card>
+      )}
       <ErrorText message={error} />
       {(themes ?? []).map((t) => {
         const p = progress(

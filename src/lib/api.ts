@@ -1,6 +1,7 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type { YesterdayQuestion } from './catchup';
+import type { CardSession } from './cardSession';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
@@ -402,6 +403,21 @@ export async function setCardMark(params: {
         .eq('kind', params.kind),
     );
   }
+}
+
+// ---- Samen kaarten spelen ----
+
+export async function fetchCardSession(): Promise<CardSession | null> {
+  const rows = unwrap(await supabase.from('card_sessions').select('couple_id, theme_id, question_id, started_by, expires_at').limit(1)) as CardSession[];
+  return rows[0] ?? null;
+}
+
+export async function showCardTogether(questionId: number): Promise<void> {
+  unwrap(await supabase.rpc('show_card_together', { p_question: questionId }));
+}
+
+export async function endCardSession(): Promise<void> {
+  unwrap(await supabase.rpc('end_card_session'));
 }
 
 // ---- Oefeningen ----
