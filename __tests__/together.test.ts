@@ -4,7 +4,10 @@ import {
   nextOccurrence,
   nextReunion,
   parseDateParts,
+  nextHoliday,
   reunionLabel,
+  seasonOf,
+  suggestWeekend,
   relativeLabel,
   sortDates,
   sortPlans,
@@ -107,5 +110,50 @@ describe('weerzien en op afstand', () => {
       id, slug: `di-${id}`, position: id, title: '', description: '', budget: 'gratis', setting, minutes: 60,
     });
     expect(filterIdeas([idea(1, 'binnen'), idea(2, 'op afstand')], { budget: null, setting: 'op afstand' }).map((i) => i.id)).toEqual([2]);
+  });
+});
+
+describe('seizoensdates', () => {
+  const idea = (id: number, patch: Partial<DateIdea> = {}): DateIdea => ({
+    id, slug: `di-${id}`, position: id, title: `Idee ${id}`, description: '', budget: 'gratis', setting: 'buiten', minutes: 60, ...patch,
+  });
+
+  it('kent de seizoenen', () => {
+    expect(seasonOf('2026-03-01')).toBe('lente');
+    expect(seasonOf('2026-08-31')).toBe('zomer');
+    expect(seasonOf('2026-10-27')).toBe('herfst');
+    expect(seasonOf('2026-12-01')).toBe('winter');
+    expect(seasonOf('2027-02-28')).toBe('winter');
+  });
+
+  it('kent de feestdagen, ook Koningsdag op zaterdag als 27 april een zondag is', () => {
+    expect(nextHoliday('sinterklaas', '2026-10-27')).toBe('2026-12-05');
+    expect(nextHoliday('koningsdag', '2026-10-27')).toBe('2027-04-27');
+    expect(nextHoliday('koningsdag', '2025-01-01')).toBe('2025-04-26'); // 27 april 2025 is een zondag
+    expect(nextHoliday('oud-en-nieuw', '2026-12-31')).toBe('2026-12-31');
+  });
+
+  const ideas = [
+    idea(1, { season: 'zomer' }),
+    idea(2, { season: 'herfst' }),
+    idea(3),
+    idea(4, { season: 'winter', holiday: 'sinterklaas' }),
+    idea(5, { budget: '€€' }),
+    idea(6, { setting: 'binnen' }),
+  ];
+
+  it('stelt drie ideeën voor die bij het seizoen passen, nieuwe eerst', () => {
+    const picked = suggestWeekend(ideas, { today: '2026-10-27', budget: null, setting: null, plannedIdeaIds: [3], rng: () => 0.5 });
+    expect(picked).toHaveLength(3);
+    expect(picked.map((i) => i.id)).not.toContain(1); // zomer
+    expect(picked.map((i) => i.id)).not.toContain(4); // Sinterklaas is nog meer dan drie weken weg
+    expect(picked[0].id).toBe(2); // herfst en nog niet op de lijst
+    expect(picked.map((i) => i.id)).not.toContain(3); // stond al op de lijst, er zijn genoeg andere
+  });
+
+  it('houdt rekening met budget en binnen/buiten, en met een feestdag die eraan komt', () => {
+    expect(suggestWeekend(ideas, { today: '2026-10-27', budget: '€€', setting: null, plannedIdeaIds: [] }).map((i) => i.id)).toEqual([5]);
+    expect(suggestWeekend(ideas, { today: '2026-10-27', budget: null, setting: 'binnen', plannedIdeaIds: [] }).map((i) => i.id)).toEqual([6]);
+    expect(suggestWeekend(ideas, { today: '2026-12-01', budget: null, setting: null, plannedIdeaIds: [], rng: () => 0.5 })[0].id).toBe(4);
   });
 });

@@ -21,6 +21,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
 | 9 | Quick wins: 60 extra dagvragen, strengere contentcheck, weekritme met pauze, gisteren inhalen, hulppagina, inclusieve teksten, onderbouwing bij oefeningen, kaarten schudden | ✅ |
 | 10 | Volgend kwartaal: slimme rotatie en "Een jaar geleden", 180 dagvragen, themaweken, "Ik denk aan je" en eigen meldtijd, solo-kaart, maandelijkse check-in, herstelcode en export, op afstand | ✅ |
+| 11 | Later: thuisschermwidget, Ons jaar, samen kaarten spelen, seizoensdates, 365 dagvragen | ✅ |
 
 ## Startcontent
 
@@ -28,12 +29,12 @@ Alles is zelf geschreven, in het Nederlands.
 
 | Onderdeel | Aantal |
 |---|---|
-| Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
+| Dagelijkse vragen | 365 (45% luchtig, 35% persoonlijk, 20% diep): elke dag van het jaar een andere |
 | Themaweken | 6 series × 7 vragen, elk met intro en afsluitende oefening |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 9 thema's × 15 kaarten (waaronder *Op afstand*) + 18+-set van 15 |
 | Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
-| Date-ideeën | 50 (waarvan 8 voor op afstand) |
+| Date-ideeën | 65 (waarvan 8 voor op afstand en 15 bij een seizoen of feestdag) |
 
 ## Techniek
 
@@ -43,12 +44,14 @@ Alles is zelf geschreven, in het Nederlands.
 
 ```
 src/app/            schermen (expo-router)
+src/widgets/        thuisschermwidget (expo-widgets, alleen in development- en store-builds)
 src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
 supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen,
-                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand)
+                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand, seizoenen,
+                    samen spelen, ons jaar)
 supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
@@ -134,6 +137,16 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
 
+**Ons jaar testen.**
+- Open **Ik → Ons jaar**, of tik op de verjaardag van jullie koppeling op de kaart op **Vandaag**. Het overzicht wordt helemaal op het toestel gemaakt. Het toont het aantal samen-dagen, de antwoorden waarop jullie allebei met een hartje reageerden, afgevinkte plannen, jullie beste quiz (samen opgeteld) en favoriete kaarten.
+- Tot 30 dagen na de verjaardag zie je het jaar dat net af is, daarna het lopende jaar.
+- **Delen als afbeelding** kan pas als jullie allebei *Ik vind delen goed* hebben gekozen, voor dit specifieke overzicht. Dat kan alleen in de app (`react-native-view-shot`), niet in de browser.
+
+**Samen kaarten spelen testen.**
+- Open op toestel 1 een thema en tik op **Speel samen**. Op toestel 2 verschijnt bij **Kaarten** *"Jullie spelen samen: …"*. Tik op *Doe mee*.
+- Wie op *Vorige*, *Volgende* of *Schud* tikt, neemt de ander live mee (Realtime). Er ligt steeds één kaart open; er wordt geen geschiedenis bewaard.
+- De sessie stopt na twee uur vanzelf, of als een van jullie op *Stoppen met samen spelen* tikt. Verlopen sessies worden bij de volgende actie gewist. 18+-kaarten blijven alleen beschikbaar met dubbele toestemming.
+
 **Samen plannen testen.**
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
@@ -172,6 +185,10 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 **Op afstand testen.**
 - Bij **Kaarten** staat het thema *Op afstand* (15 kaarten, 5 per diepgang). Bij de date-ideeën filter je op *Op afstand*.
 - Voeg onder *Belangrijke datums* de soort *We zien elkaar weer* toe. Zolang die datum nog komt, staat bovenaan **Vandaag** bijvoorbeeld *"Nog 12 dagen tot jullie elkaar weer zien"*.
+
+**Seizoensdates testen.**
+- Date-ideeën hebben nu een optioneel seizoen (meteorologisch: lente = maart–mei, enzovoort) en een optionele feestdag (Sinterklaas, Koningsdag, oud en nieuw).
+- Tik bij de date-ideeën op **Plan iets voor dit weekend**. Je krijgt drie ideeën die passen bij het seizoen en bij je filters voor budget en binnen/buiten/op afstand. Ideeën die nog niet op jullie lijst staan, gaan voor. Een feestdag-idee verschijnt alleen in de drie weken ervoor.
 
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
@@ -228,6 +245,21 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
 - **Overzetcodes en herstelcodes.** Een overzetcode is 15 minuten en één keer geldig. Een herstelcode heeft 16 tekens, is lang geldig en werkt één keer. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
 - **Export op het toestel.** De export (JSON of HTML) wordt op de telefoon gemaakt en via het deelmenu gedeeld. Er blijft geen kopie op een server.
+
+## Thuisschermwidget (iOS en Android)
+
+De widget toont *"Vraag van vandaag staat klaar"* of *"Jullie hebben allebei geantwoord"*, *"[naam] heeft geantwoord"* en eventueel de aftelteller tot het weerzien. Hij toont **nooit** de tekst van een antwoord. De vraag zelf staat er alleen op als je dat aanzet onder **Ik → Thuisschermwidget** (standaard uit, alleen op dat toestel bewaard).
+
+**Hoe het werkt**
+- Het gebruikt `expo-widgets` (SDK 58) met `@expo/ui`. De layout staat in `src/widgets/TweeklankWidget.ios.tsx` (SwiftUI) en `TweeklankWidget.android.tsx` (Jetpack Compose).
+- De app geeft de gegevens door met `updateSnapshot`, via de gedeelde app-groep `group.nl.tweeklank.app` op iOS en de opslag van de widget op Android. De widget doet zelf geen netwerkverzoek. Hij wordt dus bijgewerkt als je de app opent.
+- **Gescheiden van de rest:** de config-plugin staat in `app.config.js` en staat alleen aan als `TWEEKLANK_WIDGETS=1` is gezet. Dat gebeurt in alle profielen in `eas.json`. `src/lib/widget.ts` laadt de widget alleen als de native module bestaat. In Expo Go en in de webversie gebeurt er dus niets.
+
+**Bouwen**
+1. Development build: `npx eas-cli build --profile development --platform ios` (of `android`). Lokaal kan ook: `TWEEKLANK_WIDGETS=1 npx expo run:ios`.
+2. Installeer de build, open de app één keer en log in. De widget krijgt zijn layout pas als de app een keer heeft gedraaid.
+3. Voeg de widget toe vanuit het widgetmenu van je thuisscherm (zoek op *Tweeklank*).
+4. **iOS:** de app-groep `group.nl.tweeklank.app` moet bij je Apple Developer-account horen. EAS regelt dat bij een build met je eigen account. Pas hem in `app.config.js` aan als je een andere bundle-ID gebruikt.
 
 ## Hulppagina "Als het niet goed gaat"
 

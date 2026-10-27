@@ -1,6 +1,8 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
+import { amsterdamDay } from './dates';
 import { supabase } from './supabase';
 import type { YesterdayQuestion } from './catchup';
+import type { CardSession } from './cardSession';
 import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
@@ -404,6 +406,56 @@ export async function setCardMark(params: {
   }
 }
 
+// ---- Samen kaarten spelen ----
+
+export async function fetchCardSession(): Promise<CardSession | null> {
+  const rows = unwrap(await supabase.from('card_sessions').select('couple_id, theme_id, question_id, started_by, expires_at').limit(1)) as CardSession[];
+  return rows[0] ?? null;
+}
+
+export async function showCardTogether(questionId: number): Promise<void> {
+  unwrap(await supabase.rpc('show_card_together', { p_question: questionId }));
+}
+
+export async function endCardSession(): Promise<void> {
+  unwrap(await supabase.rpc('end_card_session'));
+}
+
+// ---- Ons jaar ----
+
+/** Dag waarop jullie koppel begon (Amsterdamse kalenderdag). */
+export async function fetchCoupleStart(): Promise<string | null> {
+  const rows = unwrap(await supabase.from('couples').select('created_at').limit(1)) as { created_at: string }[];
+  return rows[0] ? amsterdamDay(new Date(rows[0].created_at)) : null;
+}
+
+export async function fetchFavoriteCardTexts(): Promise<string[]> {
+  const rows = unwrap(
+    await supabase.from('card_marks').select('question_id, theme_questions(text)').eq('kind', 'favoriet'),
+  ) as unknown as { theme_questions: { text: string } | null }[];
+  return rows.map((r) => r.theme_questions?.text).filter((t): t is string => !!t);
+}
+
+/** Wie gaf toestemming om het overzicht van dit jaar te delen? */
+export async function fetchYearConsents(periodStart: string): Promise<string[]> {
+  const rows = unwrap(
+    await supabase.from('year_share_consents').select('user_id').eq('period_start', periodStart),
+  ) as { user_id: string }[];
+  return rows.map((r) => r.user_id);
+}
+
+export async function setYearConsent(params: { coupleId: string; userId: string; periodStart: string; on: boolean }): Promise<void> {
+  if (params.on) {
+    unwrap(
+      await supabase
+        .from('year_share_consents')
+        .upsert({ couple_id: params.coupleId, user_id: params.userId, period_start: params.periodStart }, { ignoreDuplicates: true }),
+    );
+  } else {
+    unwrap(await supabase.from('year_share_consents').delete().eq('user_id', params.userId).eq('period_start', params.periodStart));
+  }
+}
+
 // ---- Oefeningen ----
 
 export async function fetchExercises(): Promise<Exercise[]> {
@@ -445,7 +497,7 @@ export async function fetchDateIdeas(): Promise<DateIdea[]> {
   return unwrap(await supabase.from('date_ideas').select('*').order('position')) as DateIdea[];
 }
 
-const PLAN_FIELDS = 'id, title, notes, planned_for, done, created_at, created_by';
+const PLAN_FIELDS = 'id, title, notes, planned_for, done, created_at, created_by, date_idea_id';
 
 export async function fetchPlans(): Promise<Plan[]> {
   return unwrap(await supabase.from('plans').select(PLAN_FIELDS)) as Plan[];

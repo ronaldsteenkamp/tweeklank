@@ -68,7 +68,7 @@ describe('contentcheck', () => {
     const content = parseContent(migrations());
     const daily = Object.values(content.daily_questions);
     const regular = daily.filter((q) => q.slug.startsWith('dv-'));
-    expect(regular.length).toBeGreaterThanOrEqual(180);
+    expect(regular.length).toBe(365);
     expect(nearDuplicates(daily.map((q) => ({ slug: q.slug, text: String(q.text) })))).toEqual([]);
     expect(depthDistribution(regular.map((q) => Number(q.depth))).ok).toBe(true);
     expect(Object.keys(content.question_series)).toHaveLength(6);

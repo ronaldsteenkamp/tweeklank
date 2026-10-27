@@ -7,14 +7,17 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": { "TWEEKLANK_WIDGETS": "1" },
       "android": { "buildType": "apk" }
     },
     "preview": {
       "distribution": "internal",
+      "env": { "TWEEKLANK_WIDGETS": "1" },
       "android": { "buildType": "apk" }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": { "TWEEKLANK_WIDGETS": "1" }
     }
   }
 }

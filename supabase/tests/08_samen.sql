@@ -28,7 +28,7 @@ insert into public.push_tokens (token, user_id, platform) values
 -- Plannen
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 set local role authenticated;
-select is((select count(*) from public.date_ideas), 50::bigint, 'date-ideeën leesbaar');
+select ok((select count(*) from public.date_ideas) >= 50, 'date-ideeën leesbaar');
 select lives_ok($$
   insert into public.plans (couple_id, created_by, title, date_idea_id, planned_for)
   select public.my_couple_id(), auth.uid(), title, id, '2026-11-01' from public.date_ideas where slug = 'di-01'

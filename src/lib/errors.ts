@@ -19,6 +19,7 @@ const MESSAGES: Record<string, string> = {
   serie_niet_beschikbaar: 'Deze themaweek is niet (meer) beschikbaar.',
   duwtje_al_verstuurd: 'Je hebt vandaag al een seintje gestuurd. Morgen kan het weer.',
   duwtje_niet_beschikbaar: 'Dit kan nu niet.',
+  kaart_niet_beschikbaar: 'Deze kaart is niet beschikbaar.',
   geen_vragen: 'Er zijn nog geen vragen geladen. Controleer de database-migraties.',
 };
 
