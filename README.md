@@ -86,8 +86,8 @@ Het project **tweeklank** draait al:
 6. **Pushmeldingen.** Dit kun je ook later doen; de app werkt prima zonder.
    1. Deploy de functie: `npx supabase functions deploy send-push --no-verify-jwt`.
    2. Vul in `supabase/sql/cron-en-webhook.sql` je project-URL in en draai het bestand eenmalig in de *SQL Editor*. Dat zet klaar:
-      - de trigger voor *"partner heeft geantwoord"*;
-      - de cron-jobs voor 9:00 uur;
+      - de triggers voor *"partner heeft geantwoord"* en *"Ik denk aan je"*;
+      - één cron-job elk heel uur, die alleen wie dat uur als meldtijd koos de dagmelding en datumherinneringen stuurt (standaard 9:00);
       - een willekeurig geheim in de Vault.
 
       `send-push` leest dat geheim zelf uit de Vault. Er is dus geen Edge Function-secret nodig.
@@ -135,7 +135,7 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 **Samen plannen testen.**
 - Open **Samen**, kies een date-idee en tik op *Zet op onze lijst*. Je partner ziet het plan onder *Onze plannen*. Daar kun je het ook afvinken.
 - Voeg onder *Belangrijke datums* jullie jubileum toe. Je ziet dan meteen hoeveel dagen het nog duurt en het hoeveelste jaar het wordt.
-- Datumherinneringen komen om 9:00 als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
+- Datumherinneringen komen op je eigen meldtijd (standaard 9:00) als pushmelding, bijvoorbeeld *"Over 7 dagen: Jubileum"*. Een datum op 29 februari valt in een gewoon jaar op 28 februari.
 
 **Rotatie en "Een jaar geleden" testen.**
 - Een koppel krijgt eerst alle vragen die het nog niet had, op volgorde. Pas daarna komen vragen terug: de vraag die het langst geleden is gesteld.
@@ -165,7 +165,11 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - **iPhone:** in Expo Go kun je meldingen gewoon aanzetten onder *Ik → Meldingen*.
 - **Android:** Expo Go ondersteunt geen pushmeldingen. Maak daarom een development build met `npx eas-cli build --profile development --platform android`. Dat kan gratis. Installeer de APK en start dan `npx expo start`.
 - Werkt de trigger? Kijk in de logs van de Edge Function `send-push` in het dashboard.
-- Testen zonder op 9 uur te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"daily","force":true}'::jsonb);`.
+- Testen zonder op je meldtijd te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"hourly","hour":9}'::jsonb);`. Dat bedient iedereen met meldtijd 9:00 die vandaag nog niets kreeg. Nog een keer proberen: `delete from public.push_daily_log where day = public.ams_today();`.
+- **Eigen meldtijd:** kies onder **Ik → Meldingen** met *Eerder* en *Later* het uur van de dagmelding. Eén cron-job per uur bedient alleen wie dat uur koos. Als de klok teruggaat, komt de melding niet dubbel. Als de klok vooruitgaat, komt de melding van het overgeslagen uur een uur later.
+- **Ik denk aan je:** op **Vandaag**, één keer per dag per persoon (afgedwongen in de database). De melding is *"[naam] denkt aan je"*, zonder inhoud. De ontvanger kan dit uitzetten onder **Ik → Meldingen**. De verzender ziet dan alleen *"Nu niet beschikbaar"*.
+
+> **Na deze update:** draai `supabase/sql/cron-en-webhook.sql` opnieuw in de SQL Editor en deploy `send-push` opnieuw. Het script vervangt de twee oude cron-jobs (07:00 en 08:00 UTC) door één job per uur en zet de trigger voor *Ik denk aan je* klaar.
 
 **Overzetten naar een nieuwe telefoon testen.**
 1. Ga op toestel 1 naar **Ik → Naar een nieuwe telefoon** en tik op *Maak een overzetcode*.

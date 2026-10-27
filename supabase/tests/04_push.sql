@@ -37,7 +37,7 @@ set local role authenticated;
 select is((select count(*) from public.push_tokens), 1::bigint, 'je ziet alleen je eigen token (niet dat van je partner)');
 select throws_ok($$ insert into public.push_tokens (token, user_id, platform) values ('ExponentPushToken[xxx]', auth.uid(), 'ios') $$,
   '42501', null, 'tokens direct invoegen kan niet (alleen via register_push_token)');
-select throws_ok($$ select * from public.push_targets_new_question() $$, '42501', null, 'clients kunnen ontvangers niet opvragen');
+select throws_ok($$ select * from public.push_targets_new_question('{}') $$, '42501', null, 'clients kunnen ontvangers niet opvragen');
 select throws_ok($$ select * from public.push_targets_partner_answered(1) $$, '42501', null, 'clients kunnen partner-ontvangers niet opvragen');
 select throws_ok($$ select public.push_webhook_secret() $$, '42501', null, 'clients kunnen het push-geheim niet opvragen');
 reset role;
@@ -56,7 +56,7 @@ select results_eq(
   $$ values ('ExponentPushToken[bbb]'::text, 'Anna'::text) $$,
   'alleen de partner krijgt de melding, met de naam van de schrijver');
 select results_eq(
-  $$ select token from public.push_targets_new_question() order by token $$,
+  $$ select token from public.push_targets_new_question((select array_agg(id) from public.profiles)) order by token $$,
   $$ values ('ExponentPushToken[aaa]'::text), ('ExponentPushToken[bbb]'), ('ExponentPushToken[ccc]') $$,
   'dagmelding gaat naar iedereen met een partner (E zonder partner niet)');
 reset role;
@@ -67,7 +67,7 @@ update public.profiles set notify_new_question = false where id = '11111111-1111
 set local role service_role;
 select is((select count(*) from public.push_targets_partner_answered((select id from ans))), 0::bigint,
   'geen melding als de partner die heeft uitgezet');
-select ok(not exists (select 1 from public.push_targets_new_question() where token = 'ExponentPushToken[aaa]'),
+select ok(not exists (select 1 from public.push_targets_new_question((select array_agg(id) from public.profiles)) where token = 'ExponentPushToken[aaa]'),
   'geen dagmelding als je die hebt uitgezet');
 reset role;
 

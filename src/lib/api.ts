@@ -5,6 +5,7 @@ import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
+import type { NudgeStatus } from './nudge';
 import type { WeekStatus } from './rhythm';
 import type { SeriesOffer } from './series';
 import type { YearAgoAnswer } from './yearAgo';
@@ -113,6 +114,17 @@ export async function chooseSeries(seriesId: number): Promise<'gestart' | 'wacht
 
 export async function dismissSeriesOffer(): Promise<void> {
   unwrap(await supabase.rpc('dismiss_series_offer', { p_snooze: true }));
+}
+
+// ---- Ik denk aan je ----
+
+export async function fetchNudgeStatus(): Promise<NudgeStatus | null> {
+  const rows = unwrap(await supabase.rpc('nudge_status')) as NudgeStatus[];
+  return rows[0] ?? null;
+}
+
+export async function sendNudge(): Promise<void> {
+  unwrap(await supabase.rpc('send_nudge'));
 }
 
 // ---- Weekritme ----

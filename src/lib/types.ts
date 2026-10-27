@@ -8,6 +8,8 @@ export type Profile = {
   explicit_opt_in: boolean;
   adult_confirmed_at: string | null;
   show_year_ago: boolean;
+  notify_nudges: boolean;
+  notify_hour: number;
 };
 
 export type TodayQuestion = {

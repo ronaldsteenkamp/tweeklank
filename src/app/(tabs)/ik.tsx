@@ -8,6 +8,7 @@ import { confirmSignOut, signOut } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { useSession } from '@/lib/session';
 import { registerForPush, unregisterPush } from '@/lib/push';
+import { hourLabel, shiftHour } from '@/lib/nudge';
 import { PAUSE_OPTIONS, pauseLabel, WEEK_GOALS, type WeekStatus } from '@/lib/rhythm';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
 import { useTheme, type ThemePref } from '@/theme/ThemeProvider';
@@ -40,13 +41,13 @@ export default function Ik() {
   const partnerName = partner?.display_name || 'je partner';
   const phoneOnly = isPhoneOnlyAccount(session?.user);
 
-  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates', value: boolean) =>
+  const toggleNotify = (key: 'notify_new_question' | 'notify_partner_answered' | 'notify_dates' | 'notify_nudges', value: boolean) =>
     run(key, async () => {
       if (!session || !me) return;
       setPushInfo(null);
       await updateProfile(session.user.id, { [key]: value });
       const next = { ...me, [key]: value };
-      const anyOn = next.notify_new_question || next.notify_partner_answered || next.notify_dates;
+      const anyOn = next.notify_new_question || next.notify_partner_answered || next.notify_dates || next.notify_nudges;
       if (anyOn) {
         const result = await registerForPush();
         if (!result.ok) setPushInfo(result.message);
@@ -113,6 +114,13 @@ export default function Ik() {
     if (theirs) return `${partnerName} heeft dit aangezet. Zet het ook aan als je dat wilt.`;
     return null;
   })();
+
+  const changeHour = (delta: number) =>
+    run('hour', async () => {
+      if (!session || !me) return;
+      await updateProfile(session.user.id, { notify_hour: shiftHour(me.notify_hour ?? 9, delta) });
+      await refresh();
+    });
 
   const chooseGoal = (goal: number) =>
     run('goal', async () => {
@@ -237,7 +245,7 @@ export default function Ik() {
         <AppText variant="large">Meldingen</AppText>
         <NotifySwitch
           label="De vraag van vandaag staat klaar"
-          hint="Elke ochtend om 9 uur"
+          hint={`Elke dag om ${hourLabel(me?.notify_hour ?? 9)}`}
           value={!!me?.notify_new_question}
           disabled={busy !== null}
           onChange={(v) => toggleNotify('notify_new_question', v)}
@@ -248,6 +256,18 @@ export default function Ik() {
           value={!!me?.notify_partner_answered}
           disabled={busy !== null}
           onChange={(v) => toggleNotify('notify_partner_answered', v)}
+        />
+        <AppText accessibilityLiveRegion="polite">Meldtijd: {hourLabel(me?.notify_hour ?? 9)} (Nederlandse tijd)</AppText>
+        <Row gap={spacing.sm} wrap>
+          <Button kind="secondary" label="Eerder" onPress={() => changeHour(-1)} disabled={busy !== null} accessibilityHint="Meldtijd een uur eerder" />
+          <Button kind="secondary" label="Later" onPress={() => changeHour(1)} disabled={busy !== null} accessibilityHint="Meldtijd een uur later" />
+        </Row>
+        <NotifySwitch
+          label={`"Ik denk aan je" van ${partnerName}`}
+          hint="Een seintje zonder inhoud, hoogstens één per dag"
+          value={!!me?.notify_nudges}
+          disabled={busy !== null}
+          onChange={(v) => toggleNotify('notify_nudges', v)}
         />
         <NotifySwitch
           label="Herinneringen aan belangrijke datums"

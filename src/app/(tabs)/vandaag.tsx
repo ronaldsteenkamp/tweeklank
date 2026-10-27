@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
+import { NudgeButton } from '@/components/NudgeButton';
 import { SeriesOfferCard } from '@/components/SeriesOfferCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
@@ -198,6 +199,7 @@ export default function Vandaag() {
           </Card>
         )}
         {!showForm && <SeriesOfferCard offers={offers} partnerName={partnerName} onChanged={load} />}
+        <NudgeButton partnerName={partnerName} />
         <ErrorText message={error} />
       </ScrollView>
     </SafeAreaView>

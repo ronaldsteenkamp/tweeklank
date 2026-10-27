@@ -69,12 +69,34 @@ create trigger daily_answers_push
   after insert on public.daily_answers
   for each row execute function public.on_daily_answer_insert();
 
--- "De vraag van vandaag staat klaar": om 07:00 én 08:00 UTC; de functie verstuurt
--- alleen op het moment dat het in Amsterdam 9 uur is (werkt dus in zomer- én wintertijd).
-do $$
+-- "Ik denk aan je": bij elk nieuw duwtje (de melding bevat alleen de naam)
+create or replace function public.on_nudge_insert()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
 begin
-  perform cron.unschedule(jobname) from cron.job where jobname like 'tweeklank-dagvraag-%';
+  perform public.notify_push(jsonb_build_object(
+    'type', 'INSERT', 'table', 'nudges', 'record', jsonb_build_object('id', new.id)
+  ));
+  return new;
 end;
 $$;
-select cron.schedule('tweeklank-dagvraag-07', '0 7 * * *', $$select public.notify_push('{"type":"daily"}'::jsonb)$$);
-select cron.schedule('tweeklank-dagvraag-08', '0 8 * * *', $$select public.notify_push('{"type":"daily"}'::jsonb)$$);
+
+drop trigger if exists nudges_push on public.nudges;
+create trigger nudges_push
+  after insert on public.nudges
+  for each row execute function public.on_nudge_insert();
+
+-- "De vraag van vandaag staat klaar" en datumherinneringen: één job elk heel uur (UTC).
+-- send-push rekent het uur om naar Amsterdamse tijd en bedient alleen wie dat uur als meldtijd koos.
+-- Zomer- en wintertijd: een logboek per dag voorkomt dubbele meldingen als de klok teruggaat, en wie
+-- het overgeslagen uur koos (klok vooruit) krijgt de melding een uur later.
+do $$
+begin
+  perform cron.unschedule(jobname) from cron.job
+  where jobname like 'tweeklank-dagvraag-%' or jobname = 'tweeklank-meldingen-elk-uur';
+end;
+$$;
+select cron.schedule('tweeklank-meldingen-elk-uur', '0 * * * *', $$select public.notify_push('{"type":"hourly"}'::jsonb)$$);

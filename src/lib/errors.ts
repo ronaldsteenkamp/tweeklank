@@ -17,6 +17,8 @@ const MESSAGES: Record<string, string> = {
   al_gepauzeerd: 'Jullie ritme staat al op pauze.',
   serie_al_bezig: 'Jullie zijn al met een themaweek bezig.',
   serie_niet_beschikbaar: 'Deze themaweek is niet (meer) beschikbaar.',
+  duwtje_al_verstuurd: 'Je hebt vandaag al een seintje gestuurd. Morgen kan het weer.',
+  duwtje_niet_beschikbaar: 'Dit kan nu niet.',
   geen_vragen: 'Er zijn nog geen vragen geladen. Controleer de database-migraties.',
 };
 

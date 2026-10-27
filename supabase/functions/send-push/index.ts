@@ -1,20 +1,23 @@
 // Verstuurt pushmeldingen via de Expo Push API.
 //
 // Aanroepen (alleen met de geheime header x-tweeklank-secret):
-//   * Database Webhook op INSERT in daily_answers  → body { type: 'INSERT', record: { id } }
-//   * pg_cron om 07:00 en 08:00 UTC                 → body { type: 'daily' }  (dagvraag + datumherinneringen,
-//                                                     alleen als het 9 uur is in Amsterdam)
+//   * trigger op INSERT in daily_answers  → body { type: 'INSERT', table: 'daily_answers', record: { id } }
+//   * trigger op INSERT in nudges         → body { type: 'INSERT', table: 'nudges', record: { id } }
+//   * pg_cron elk heel uur (UTC)          → body { type: 'hourly' }  (dagvraag + datumherinneringen voor
+//                                           iedereen die dit uur, Amsterdamse tijd, als meldtijd koos)
+//   Testen: { type: 'hourly', hour: 9 } bedient wie 9 uur koos en vandaag nog niets kreeg.
 //
 // Het geheim leest de functie uit Vault (tweeklank_push_secret, via public.push_webhook_secret()).
 // Deploy: npx supabase functions deploy send-push --no-verify-jwt
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import {
+  amsterdamHour,
   chunk,
   dateReminderMessages,
   EXPO_PUSH_URL,
   invalidTokens,
-  isAmsterdamHour,
   newQuestionMessages,
+  nudgeMessages,
   partnerAnsweredMessages,
   type PushMessage,
   type PushTicket,
@@ -63,11 +66,20 @@ Deno.serve(async (req) => {
     const { data, error } = await admin.rpc('push_targets_partner_answered', { p_answer: payload.record.id });
     if (error) return json({ error: error.message }, 500);
     messages = partnerAnsweredMessages(data ?? []);
-  } else if (payload.type === 'daily') {
-    if (!payload.force && !isAmsterdamHour(new Date(), 9)) return json({ skipped: 'niet 9 uur in Amsterdam' });
-    const { data, error } = await admin.rpc('push_targets_new_question');
+  } else if (payload.type === 'INSERT' && payload.table === 'nudges' && payload.record?.id) {
+    const { data, error } = await admin.rpc('push_targets_nudge', { p_nudge: payload.record.id });
     if (error) return json({ error: error.message }, 500);
-    const reminders = await admin.rpc('push_targets_date_reminders');
+    messages = nudgeMessages(data ?? []);
+  } else if (payload.type === 'hourly' || payload.type === 'daily') {
+    // 'daily' kwam van de oude cron-jobs; die worden door supabase/sql/cron-en-webhook.sql vervangen
+    const hour = Number.isInteger(payload.hour) ? payload.hour : amsterdamHour(new Date());
+    const claimed = await admin.rpc('claim_hourly_users', { p_hour: hour });
+    if (claimed.error) return json({ error: claimed.error.message }, 500);
+    const users = (claimed.data ?? []) as string[];
+    if (users.length === 0) return json({ sent: 0, hour });
+    const { data, error } = await admin.rpc('push_targets_new_question', { p_users: users });
+    if (error) return json({ error: error.message }, 500);
+    const reminders = await admin.rpc('push_targets_date_reminders', { p_users: users });
     if (reminders.error) return json({ error: reminders.error.message }, 500);
     messages = [
       ...newQuestionMessages((data ?? []).map((r: { token: string }) => r.token)),
