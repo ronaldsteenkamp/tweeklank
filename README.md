@@ -124,6 +124,7 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 **Gesprekskaarten testen.**
 - Open **Kaarten** en kies een thema.
 - Filter op diepgang (luchtig, persoonlijk of diep) en swipe door de kaarten, of gebruik Vorige/Volgende.
+- Tik op **Schud** voor een willekeurige volgorde. Die geldt alleen op jouw toestel, zolang het scherm open is, en houdt rekening met het diepgangsfilter. Een schermlezer meldt *"Kaarten geschud"*.
 - *Besproken* en *Favoriet* zie je meteen ook op het toestel van je partner, na terug- en weer heengaan.
 - **18+-set:** zet onder **Ik → 18+ gesprekskaarten** de schakelaar op **beide** toestellen aan. Pas dan verschijnt *Verlangen (18+)* bij Kaarten. Zet een van jullie hem uit, dan verdwijnt de set direct voor allebei. Dat wordt in de database afgedwongen.
 
