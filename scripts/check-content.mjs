@@ -146,6 +146,16 @@ if (near.length) {
   console.log(`✓ geen (bijna) dubbele dagvragen (${daily.length} gecontroleerd)`);
 }
 
+// Oefeningen: elke oefening een eerlijke onderbouwing, nooit "bewezen"
+const exercises = Object.values(content.exercises ?? {});
+const badSources = exercises.filter((e) => typeof e.source !== 'string' || !e.source.startsWith('Geïnspireerd op') || /bewezen/i.test(e.source));
+if (badSources.length) {
+  ok = false;
+  console.log(`✗ oefeningen zonder (eerlijke) onderbouwing: ${badSources.map((e) => e.slug).join(', ')}`);
+} else {
+  console.log(`✓ alle oefeningen hebben een onderbouwing (${exercises.length} gecontroleerd)`);
+}
+
 // Diepgangsverdeling: in totaal en per portie van 60 (45% luchtig, 35% persoonlijk, 20% diep, ±5 punt)
 const pct = (x) => `${Math.round(x * 100)}%`;
 const portions = [['alle dagvragen', daily]];

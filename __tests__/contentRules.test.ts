@@ -70,6 +70,10 @@ describe('contentcheck', () => {
     expect(daily.length).toBeGreaterThanOrEqual(120);
     expect(nearDuplicates(daily.map((q) => ({ slug: q.slug, text: String(q.text) })))).toEqual([]);
     expect(depthDistribution(daily.map((q) => Number(q.depth))).ok).toBe(true);
+    const sources = Object.values(content.exercises).map((e) => String(e.source));
+    expect(sources).toHaveLength(12);
+    for (const src of sources) expect(src).toMatch(/^Geïnspireerd op .+/);
+    expect(sources.join(' ')).not.toMatch(/bewezen/i);
     for (const rows of Object.values(content)) {
       for (const row of Object.values(rows)) {
         for (const value of Object.values(row)) if (typeof value === 'string') expect(genderedWords(value)).toEqual([]);

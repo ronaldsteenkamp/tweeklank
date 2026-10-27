@@ -10,6 +10,7 @@ const ex = (id: number, category: Exercise['category']): Exercise => ({
   intro: '',
   steps: ['a', 'b'],
   why: '',
+  source: null,
 });
 
 describe('oefeningen', () => {

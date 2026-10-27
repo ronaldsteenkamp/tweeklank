@@ -27,7 +27,7 @@ Alles is zelf geschreven, in het Nederlands.
 | Dagelijkse vragen | 120 (45% luchtig, 35% persoonlijk, 20% diep) |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
-| Oefeningen | 12 |
+| Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
 | Date-ideeën | 42 |
 
 ## Techniek

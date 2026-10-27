@@ -86,6 +86,11 @@ export default function OefeningDetail() {
       <Card tone="alt">
         <AppText variant="large">Waarom dit helpt</AppText>
         <AppText>{exercise.why}</AppText>
+        {exercise.source ? (
+          <AppText variant="small" muted>
+            {exercise.source}
+          </AppText>
+        ) : null}
       </Card>
 
       <Card>

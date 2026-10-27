@@ -19,6 +19,8 @@ export type Exercise = {
   intro: string;
   steps: string[];
   why: string;
+  /** korte regel over waar de oefening op is geïnspireerd */
+  source: string | null;
 };
 
 export type Completion = {
