@@ -15,3 +15,7 @@ verify_jwt = true
 [functions.send-push]
 # Beveiligd met de header x-tweeklank-secret in plaats van een gebruikers-JWT
 verify_jwt = false
+
+[functions.transfer-account]
+# De nieuwe telefoon is nog niet ingelogd; de eenmalige overzetcode is het bewijs
+verify_jwt = false
