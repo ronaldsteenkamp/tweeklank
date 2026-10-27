@@ -1,6 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
+import { HelpLink } from '@/components/HelpLink';
 import { AppText, Button, Card, Chip, ErrorText, Field, Row, Screen } from '@/components/ui';
 import { deleteAccount, fetchWeek, leaveCouple, setWeekGoal, startPause, stopPause, updateProfile } from '@/lib/api';
 import { confirmSignOut, signOut } from '@/lib/auth';
@@ -358,6 +359,7 @@ export default function Ik() {
         <Button kind="secondary" label="Uitloggen" onPress={() => confirmSignOut(phoneOnly, () => router.replace('/'))} />
         <Button kind="danger" label="Account verwijderen" onPress={confirmDelete} busy={busy === 'delete'} />
       </View>
+      <HelpLink />
     </Screen>
   );
 }

@@ -119,6 +119,8 @@ export function Button({
   disabled,
   busy,
   accessibilityHint,
+  accessibilityLabel,
+  accessibilityRole = 'button',
 }: {
   label: string;
   onPress: () => void;
@@ -126,6 +128,8 @@ export function Button({
   disabled?: boolean;
   busy?: boolean;
   accessibilityHint?: string;
+  accessibilityLabel?: string;
+  accessibilityRole?: 'button' | 'link';
 }) {
   const { colors } = useTheme();
   const palette: Record<ButtonKind, { bg: string; fg: string; border: string }> = {
@@ -140,8 +144,8 @@ export function Button({
     <Pressable
       onPress={onPress}
       disabled={inactive}
-      accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: !!inactive, busy: !!busy }}
       style={({ pressed }) => ({

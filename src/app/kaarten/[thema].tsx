@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, Switch, useWindowDimensions, View } from 'react-native';
+import { HelpLink } from '@/components/HelpLink';
 import { AppText, Button, Chip, DEPTH_LABEL, ErrorText, Loading, Row, Screen } from '@/components/ui';
 import { fetchCardMarks, fetchTheme, setCardMark, type ThemeDetail } from '@/lib/api';
 import {
@@ -162,6 +163,11 @@ export default function ThemaKaarten() {
             </Row>
           </View>
         </>
+      )}
+      {theme.slug === 'th-onenigheid' && (
+        <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg }}>
+          <HelpLink />
+        </View>
       )}
     </Screen>
   );

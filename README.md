@@ -183,6 +183,21 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
 - **Overzetcodes.** Een overzetcode is 15 minuten en één keer geldig. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
 
+## Hulppagina "Als het niet goed gaat"
+
+Een statisch scherm (`src/app/hulp.tsx`, gegevens in `src/lib/help.ts`). Je vindt het via een kleine link onder **Ik**, onderaan **Oefeningen** en bij het kaartthema **Onenigheid**. Er wordt niets opgeslagen, er gaat geen melding uit en er is geen analyse.
+
+| Gegeven | Bron | Gecontroleerd |
+|---|---|---|
+| Veilig Thuis, 0800-2000, gratis, 24/7, anoniem | rijksoverheid.nl en gemeentepagina's (Utrecht, Den Haag) via zoekresultaten | 27-10-2026 |
+| 113 Zelfmoordpreventie, 113 en gratis 0800-0113, chat op 113.nl | folder op 113.nl (pdf) en hartvannederland.nl via zoekresultaten | 27-10-2026 |
+| Fier, 088-2080000, anoniem contact mogelijk | help.unhcr.org en findahelpline.com via zoekresultaten | 27-10-2026 |
+| POH-GGZ bij de huisarts | praktijkwebsites en richtlijnendatabase.nl via zoekresultaten | 27-10-2026 |
+| NVRG (nvrg.nl) voor geregistreerde relatie- en gezinstherapeuten | Volkskrant (via eft.nl) en mijnzzp.nl via zoekresultaten | 27-10-2026 |
+| 112 bij acuut gevaar | rijksoverheid.nl | 27-10-2026 |
+
+> **Let op:** de officiële websites zelf konden vanuit de bouwomgeving niet worden geopend. Controleer de nummers en links nog een keer op veiligthuis.nl, 113.nl, fier.nl en nvrg.nl voordat je de app naar de stores stuurt.
+
 ## Toegankelijkheid
 
 - **Contrast:** alle tekstkleuren halen WCAG AA (≥ 4,5:1) in het lichte en het donkere thema. `__tests__/contrast.test.ts` controleert dat automatisch.
