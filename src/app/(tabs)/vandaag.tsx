@@ -34,7 +34,12 @@ export default function Vandaag() {
     try {
       const q = await fetchToday();
       setToday(q);
-      const [a, w, y] = await Promise.all([fetchAnswers(q.day), fetchWeek(), fetchYesterday()]);
+      // Weekritme en gisteren zijn extra's: als die (nog) niet laden, werkt de vraag van vandaag gewoon
+      const [a, w, y] = await Promise.all([
+        fetchAnswers(q.day),
+        fetchWeek().catch(() => null),
+        fetchYesterday().catch(() => null),
+      ]);
       setAnswers(a);
       setWeek(w);
       setYesterday(y);
