@@ -9,13 +9,14 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | Fase | Inhoud | Status |
 |---|---|---|
 | 0 | Expo + TypeScript + expo-router, thema licht/donker, tests | ✅ |
-| 1 | Inloggen (e-mailcode), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
+| 1 | Inloggen (zonder e-mail of met inloglink), koppelen/ontkoppelen, dagelijkse vraag, reacties, archief, account verwijderen, 60 vragen | ✅ |
 | 2 | Streak-weergave, pushmeldingen | ✅ |
 | 3 | Quizzen "Hoe goed ken je me?" (5 × 10) | ✅ |
 | 4 | Gesprekskaarten (8 thema's × 15 + 18+-set met dubbele opt-in) | ✅ |
 | 5 | Oefeningen & tips | ✅ |
 | 6 | Samen plannen: date-ideeën, plannen, belangrijke datums | ✅ |
 | 7 | Afronding: toegankelijkheid, lint, privacy, store-voorbereiding | ✅ |
+| 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
 
 ## Startcontent
 
@@ -42,16 +43,18 @@ src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
 supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, streaks, meldingen, quiz, kaarten, oefeningen, samen)
-supabase/functions  Edge Functions (delete-account, send-push)
+supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
+docs/               privacyverklaring als webpagina (GitHub Pages)
+scripts/            contentcheck, databasetests, iconen en privacypagina maken
 ```
 
 ## Huidige installatie
 
 Het project **tweeklank** draait al:
 - **Waar:** organisatie *Tweeslag Wispo*, regio eu-central-1, project-ref `qexufuyxaxvsyaelpfkr`.
-- **Wat erin staat:** alle migraties (inclusief `…_hardening.sql` en `…_push_secret.sql`), de Edge Functions `delete-account` en `send-push`, de trigger en de cron-jobs voor meldingen.
+- **Wat erin staat:** alle migraties (inclusief `…_hardening.sql` en `…_push_secret.sql`), de Edge Functions `delete-account`, `send-push` en `transfer-account`, de trigger en de cron-jobs voor meldingen.
 - **Geheim voor meldingen:** dat is in de database zelf gegenereerd en staat in de Vault als `tweeklank_push_secret`. `send-push` leest het daar zelf uit. Getest: met het juiste geheim antwoordt de functie `200`, met een fout geheim `403`.
 
 > De migraties zijn via de Supabase-connector en de SQL Editor toegepast, met andere namen dan de bestanden in `supabase/migrations/`. Wil je later `npx supabase db push` gebruiken? Draai dan eerst `npx supabase migration repair` (zie de Supabase-documentatie). Je kunt nieuwe migraties ook in de SQL Editor plakken.
@@ -62,7 +65,7 @@ Het project **tweeklank** draait al:
 2. **Sleutels invullen.** Kopieer `.env.example` naar `.env` en vul `EXPO_PUBLIC_SUPABASE_URL` en `EXPO_PUBLIC_SUPABASE_ANON_KEY` in. Je vindt ze onder *Project Settings → API*.
 3. **Inloggen zonder e-mail aanzetten.** Ga naar *Authentication → Sign In / Providers* en zet **Allow anonymous sign-ins** aan. Dat is alles.
    - In de app tik je op **Beginnen**. Daarna kies je een naam en koppel je met de uitnodigingscode. Er is geen e-mail of wachtwoord nodig.
-   - Het account bestaat alleen op die telefoon. Verwijder je de app of raak je je telefoon kwijt, dan begin je opnieuw. De app waarschuwt hiervoor bij uitloggen.
+   - Het account bestaat alleen op die telefoon. Nieuwe telefoon? Neem het mee met een **overzetcode** (zie stap 5). Ben je je telefoon kwijt zonder code, dan begin je opnieuw. De app waarschuwt hiervoor bij uitloggen.
    - *Optioneel:* via *Liever inloggen met e-mail* kan het ook met een inloglink. Dat werkt pas goed met een eigen SMTP-server, bijvoorbeeld de gratis tier van Brevo. Zet dan ook `exp://**` en `tweeklank://**` bij *Authentication → URL Configuration → Redirect URLs*.
 4. **Database vullen.** Zet het schema, de RLS-policies en de vragen in je project:
    ```bash
@@ -71,9 +74,10 @@ Het project **tweeklank** draait al:
    npx supabase db push
    ```
    Heb je liever geen CLI? Plak dan de bestanden uit `supabase/migrations/` op volgorde in de *SQL Editor*.
-5. **Account verwijderen mogelijk maken.** Deploy de Edge Function:
+5. **Account verwijderen en overzetten mogelijk maken.** Deploy de Edge Functions:
    ```bash
    npx supabase functions deploy delete-account
+   npx supabase functions deploy transfer-account --no-verify-jwt
    ```
 6. **Pushmeldingen.** Dit kun je ook later doen; de app werkt prima zonder.
    1. Deploy de functie: `npx supabase functions deploy send-push --no-verify-jwt`.
@@ -125,6 +129,12 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - Werkt de trigger? Kijk in de logs van de Edge Function `send-push` in het dashboard.
 - Testen zonder op 9 uur te wachten? Draai in de SQL Editor `select public.notify_push('{"type":"daily","force":true}'::jsonb);`.
 
+**Overzetten naar een nieuwe telefoon testen.**
+1. Ga op toestel 1 naar **Ik → Naar een nieuwe telefoon** en tik op *Maak een overzetcode*.
+2. Op een derde toestel (of na opnieuw installeren): tik op het inlogscherm op **Ik heb een overzetcode** en vul de code in.
+3. Je komt direct binnen met dezelfde naam, koppeling en antwoorden. De code werkt maar één keer en is 15 minuten geldig.
+4. Uitloggen op de oude telefoon kan daarna gewoon; dat logt alleen díe telefoon uit.
+
 **Uitnodigingslink.** De link uit *Deel uitnodiging* opent in Expo Go als `exp://…/--/koppel/CODE`. In een echte build wordt dat `tweeklank://koppel/CODE`.
 
 ## Tests
@@ -150,6 +160,7 @@ Met Docker en de Supabase CLI kan het ook zo: `npx supabase start && npx supabas
 - **Geen tracking.** Er zitten geen analytics- of advertentie-SDK's in de app.
 - **18+ alleen met dubbele toestemming.** De 18+-kaarten zijn in de database onzichtbaar, tenzij beide partners ze zelf aanzetten en bevestigen dat ze 18 of ouder zijn.
 - **Meldingen zonder inhoud.** Een pushmelding bevat alleen de naam van je partner, nooit de inhoud van een antwoord.
+- **Overzetcodes.** Een overzetcode is 15 minuten en één keer geldig. In de database staat alleen een hash, en alleen de Edge Function kan een code inwisselen.
 
 ## Toegankelijkheid
 
@@ -164,7 +175,7 @@ De app gebruikt alleen gratis diensten: Supabase free tier, Expo/EAS free tier e
 
 1. **Eigen identiteit.**
    - Pas `ios.bundleIdentifier` en `android.package` in `app.json` aan. Nu staat er `nl.tweeklank.app`. Kies een domein dat je bezit of een unieke naam.
-   - Vervang de standaard-Expo-iconen in `assets/` door een eigen icoon en splash-afbeelding.
+   - Het icoon (twee spraakwolkjes in terracotta, zand en salie) staat in `assets/`. Aanpassen? Wijzig `scripts/make-icons.js` en draai `node scripts/make-icons.js`.
 2. **Koppelen aan EAS:** `npx eas-cli login` en `npx eas-cli init`.
 3. **Productiebuild:**
    ```bash
@@ -173,9 +184,12 @@ De app gebruikt alleen gratis diensten: Supabase free tier, Expo/EAS free tier e
 4. **Indienen:** `npx eas-cli submit --platform ios` en `--platform android`. Hiervoor heb je een Apple Developer-account (€99 per jaar) en een Google Play-ontwikkelaarsaccount (eenmalig $25) nodig. De app zelf blijft gratis.
 5. **Store-gegevens.**
    - **Leeftijdsclassificatie:** door de optionele 18+-kaarten is 17+ (App Store) of *Mature/18+* (Play Store) het verstandigst. Vermeld dat de 18+-content standaard uit staat.
-   - **Privacylabels:** er is geen tracking. De app verzamelt wel een e-mailadres (account) en door de gebruiker gemaakte content (antwoorden, plannen), uitsluitend voor de werking van de app en niet gekoppeld aan advertenties.
+   - **Privacylabels:** er is geen tracking. De app verzamelt een naam en door de gebruiker gemaakte content (antwoorden, plannen), en alleen als iemand daarvoor kiest een e-mailadres. Alles uitsluitend voor de werking van de app en niet gekoppeld aan advertenties.
    - **Account verwijderen in de app:** dat is verplicht voor beide stores en zit al in de app, onder *Ik → Account verwijderen*.
-6. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Gebruik de tekst uit `src/app/privacy.tsx` als basis en publiceer die bijvoorbeeld via GitHub Pages.
+6. **Privacyverklaring.** Beide stores vragen een URL met een privacyverklaring. Die staat klaar in `docs/index.html`, met dezelfde tekst als in de app.
+   - Zet hem online via GitHub: *Settings → Pages → Build and deployment → Deploy from a branch*, kies `main` en de map `/docs`.
+   - De URL wordt dan `https://ronaldsteenkamp.github.io/tweeklank/`.
+   - Pas je de tekst in `src/app/privacy.tsx` aan? Draai dan `node scripts/make-privacy-page.mjs`.
 
 ## Content uitbreiden
 

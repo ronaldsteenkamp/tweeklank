@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tweeklank – Privacy</title>
+  <style>
+    :root { --bg: #FBF6F0; --surface: #FFFFFF; --text: #2B2320; --muted: #6B5D55; --primary: #A84B26; --border: #E3D6C8; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #1C1714; --surface: #27201C; --text: #F3EBE3; --muted: #BBAEA4; --primary: #E8916B; --border: #46392F; }
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 system-ui, -apple-system, sans-serif; }
+    main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { color: var(--primary); font-size: 34px; margin: 0 0 4px; }
+    .lead { color: var(--muted); margin: 0 0 24px; }
+    section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; }
+    h2 { font-size: 20px; margin: 0 0 6px; }
+    p { margin: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Tweeklank</h1>
+    <p class="lead">Privacyverklaring. Tweeklank is helemaal gratis: geen abonnement, geen advertenties en geen tracking.</p>
+    <section>
+      <h2>Wat we bewaren</h2>
+      <p>Je naam (en je e-mailadres als je daarmee inlogt), jullie antwoorden en reacties, quizantwoorden, gemarkeerde kaarten, afgevinkte oefeningen, plannen en belangrijke datums.</p>
+    </section>
+    <section>
+      <h2>Wie het kan zien</h2>
+      <p>Alleen jij en je gekoppelde partner. Dat wordt afgedwongen in de database zelf (row level security), niet alleen in de app.</p>
+    </section>
+    <section>
+      <h2>Niet spieken</h2>
+      <p>Het antwoord van je partner op de dagvraag en de quizantwoorden zie je pas nadat je zelf hebt geantwoord. Ook dat regelt de database, niet alleen de app.</p>
+    </section>
+    <section>
+      <h2>18+-kaarten</h2>
+      <p>De 18+-set is alleen zichtbaar als jullie hem allebei aanzetten en bevestigen dat je 18 jaar of ouder bent. Zet een van jullie hem uit, dan verdwijnt hij direct voor allebei.</p>
+    </section>
+    <section>
+      <h2>Wat we niet doen</h2>
+      <p>Geen advertenties, geen analytics- of trackingdiensten, geen verkoop of delen van gegevens.</p>
+    </section>
+    <section>
+      <h2>Ontkoppelen</h2>
+      <p>Bij ontkoppelen worden alle gedeelde gegevens van jullie koppel definitief verwijderd, voor jullie allebei.</p>
+    </section>
+    <section>
+      <h2>Nieuwe telefoon</h2>
+      <p>Met een overzetcode (Ik → Naar een nieuwe telefoon) neem je je account mee. De code is 15 minuten en één keer geldig, en in de database staat alleen een onleesbare versie (hash) ervan. Een account zonder e-mail krijgt daarbij een intern adres dat niet bestaat; daar wordt nooit iets naartoe gestuurd.</p>
+    </section>
+    <section>
+      <h2>Account verwijderen</h2>
+      <p>Via Ik → Account verwijderen wis je je account en alle bijbehorende gegevens definitief.</p>
+    </section>
+    <section>
+      <h2>Meldingen</h2>
+      <p>Pushmeldingen gaan via de bezorgdienst van Expo naar Apple en Google. Er staat nooit de inhoud van een antwoord in. Je kunt ze per soort uitzetten.</p>
+    </section>
+    <section>
+      <h2>Opslag</h2>
+      <p>Je gegevens staan in de database (Supabase) van degene die deze app aanbiedt. Je inlogsessie wordt versleuteld op je telefoon bewaard.</p>
+    </section>
+  </main>
+</body>
+</html>

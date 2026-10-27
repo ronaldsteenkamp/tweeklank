@@ -7,6 +7,7 @@ const ITEMS: [string, string][] = [
   ['18+-kaarten', 'De 18+-set is alleen zichtbaar als jullie hem allebei aanzetten en bevestigen dat je 18 jaar of ouder bent. Zet een van jullie hem uit, dan verdwijnt hij direct voor allebei.'],
   ['Wat we niet doen', 'Geen advertenties, geen analytics- of trackingdiensten, geen verkoop of delen van gegevens.'],
   ['Ontkoppelen', 'Bij ontkoppelen worden alle gedeelde gegevens van jullie koppel definitief verwijderd, voor jullie allebei.'],
+  ['Nieuwe telefoon', 'Met een overzetcode (Ik → Naar een nieuwe telefoon) neem je je account mee. De code is 15 minuten en één keer geldig, en in de database staat alleen een onleesbare versie (hash) ervan. Een account zonder e-mail krijgt daarbij een intern adres dat niet bestaat; daar wordt nooit iets naartoe gestuurd.'],
   ['Account verwijderen', 'Via Ik → Account verwijderen wis je je account en alle bijbehorende gegevens definitief.'],
   ['Meldingen', 'Pushmeldingen gaan via de bezorgdienst van Expo naar Apple en Google. Er staat nooit de inhoud van een antwoord in. Je kunt ze per soort uitzetten.'],
   ['Opslag', 'Je gegevens staan in de database (Supabase) van degene die deze app aanbiedt. Je inlogsessie wordt versleuteld op je telefoon bewaard.'],

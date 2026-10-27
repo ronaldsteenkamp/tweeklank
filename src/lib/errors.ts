@@ -1,5 +1,7 @@
 // Vertaalt foutcodes uit de database-RPC's naar begrijpelijke Nederlandse meldingen.
+// Volgorde telt: de eerste sleutel die in de foutmelding voorkomt, wint.
 const MESSAGES: Record<string, string> = {
+  overzetcode_onbekend: 'Deze overzetcode klopt niet of is verlopen. Maak op je oude telefoon een nieuwe.',
   niet_ingelogd: 'Je bent niet (meer) ingelogd. Log opnieuw in.',
   code_onbekend: 'Deze code kennen we niet. Controleer of je hem goed hebt overgenomen.',
   code_gebruikt: 'Deze code is al gebruikt. Vraag je partner om een nieuwe.',
