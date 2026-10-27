@@ -20,6 +20,7 @@ Twee partners koppelen hun account en beantwoorden elke dag samen een vraag. Het
 | 7 | Afronding: toegankelijkheid, lint, privacy, store-voorbereiding | ✅ |
 | 8 | Overzetten naar een nieuwe telefoon, eigen icoon, privacypagina | ✅ |
 | 9 | Quick wins: 60 extra dagvragen, strengere contentcheck, weekritme met pauze, gisteren inhalen, hulppagina, inclusieve teksten, onderbouwing bij oefeningen, kaarten schudden | ✅ |
+| 10 | Volgend kwartaal: slimme rotatie en "Een jaar geleden", 180 dagvragen, themaweken, "Ik denk aan je" en eigen meldtijd, solo-kaart, maandelijkse check-in, herstelcode en export, op afstand | ✅ |
 
 ## Startcontent
 
@@ -46,7 +47,8 @@ src/components/     UI-bouwstenen
 src/lib/            Supabase-client, API, datum- en codehelpers
 src/theme/          kleuren (licht/donker) en ThemeProvider
 supabase/migrations schema, RLS, functies en content
-supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen, content)
+supabase/tests      pgTAP-tests (privacy, koppelen, zichtbaarheid, weekritme, meldingen, quiz, kaarten, oefeningen, samen,
+                    content, gisteren, rotatie, themaweken, duwtje, solo, check-in, op afstand)
 supabase/functions  Edge Functions (delete-account, send-push, transfer-account)
 supabase/sql        eenmalige scripts voor de SQL Editor (cron + trigger voor meldingen)
 __tests__/          Jest-tests voor app-logica
