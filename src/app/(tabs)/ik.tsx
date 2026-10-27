@@ -332,6 +332,14 @@ export default function Ik() {
       )}
 
       <Card>
+        <AppText variant="large">Hoe gaat het met ons?</AppText>
+        <AppText variant="small" muted>
+          Elke maand in de eerste week een korte check-in. Je ziet alleen wat er veranderde.
+        </AppText>
+        <Button kind="ghost" label="Naar de check-in" onPress={() => router.push('/checkin')} />
+      </Card>
+
+      <Card>
         <AppText variant="large">Een jaar geleden</AppText>
         <NotifySwitch
           label="Toon mijn antwoord van de vorige keer"

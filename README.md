@@ -154,6 +154,13 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - De kaart noemt nooit een aantal dagen of datums. Hij bevat een korte uitleg over verschillende behoeften aan nabijheid, één gespreksopener voor buiten de app en onderaan de link naar de hulppagina.
 - *Wegklikken* verbergt hem; hij komt hoogstens één keer per 14 dagen terug. Zie `supabase/tests/15_solo.sql`.
 
+**Maandelijkse check-in testen.**
+- Van de 1e t/m de 7e van elke maand staat op **Vandaag** de kaart *Hoe gaat het met ons?*. Je vindt hem ook onder **Ik**.
+- Vier schaalvragen van 1 tot 5 (verbondenheid, gewaardeerd voelen, onenigheid oplossen, tijd samen) en één open vraag. Na het delen ligt je check-in vast.
+- De antwoorden van je partner zie je pas als je zelf hebt ingevuld. Daarna zie je per vraag alleen de verschuiving ten opzichte van vorige maand (*iets meer*, *gelijk*, *iets minder*). Er is geen totaalscore en geen grafiek.
+- Gaf een van jullie twee maanden op rij een 1 of 2, dan staat er bij die vraag alleen *"Wil je hier meer over praten? Deze oefeningen kunnen helpen"*, met oefeningen en de hulppagina. Er gaat geen melding uit en er staat niet bij wie.
+- Zonder op de 1e te wachten: zie `supabase/tests/16_checkin.sql`.
+
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
 - Tik op *Nu beantwoorden*. Het antwoord van je partner op gisteren zie je pas als je zelf hebt geantwoord, net als bij vandaag.

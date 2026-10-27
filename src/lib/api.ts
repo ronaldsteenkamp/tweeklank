@@ -5,6 +5,7 @@ import type { CardMark, CardQuestion, MarkKind } from './cards';
 import type { Completion, Exercise } from './exercises';
 import type { DateIdea, ImportantDate, Plan } from './together';
 import type { QuizKind, QuizResultRow } from './quiz';
+import type { Checkin, ScaleKey } from './checkin';
 import type { NudgeStatus } from './nudge';
 import type { WeekStatus } from './rhythm';
 import type { SeriesOffer } from './series';
@@ -135,6 +136,38 @@ export async function fetchSoloCardDue(): Promise<boolean> {
 
 export async function dismissSoloCard(): Promise<void> {
   unwrap(await supabase.rpc('dismiss_solo_card'));
+}
+
+// ---- Maandelijkse check-in ----
+
+/** Eerste dag van de maand als de check-in nu open is (dag 1 t/m 7), anders null. */
+export async function fetchCheckinOpenMonth(): Promise<string | null> {
+  return (unwrap(await supabase.rpc('checkin_open_month')) as string | null) ?? null;
+}
+
+/** Check-ins die je mag zien (RLS: die van je partner pas na je eigen check-in van die maand). */
+export async function fetchCheckins(): Promise<Checkin[]> {
+  return unwrap(
+    await supabase.from('checkins').select('id, user_id, month, connection, appreciated, conflict, time_together, wish').order('month', { ascending: false }).limit(12),
+  ) as Checkin[];
+}
+
+export async function saveCheckin(params: {
+  coupleId: string;
+  userId: string;
+  month: string;
+  values: Record<ScaleKey, number>;
+  wish: string;
+}): Promise<void> {
+  unwrap(
+    await supabase.from('checkins').insert({
+      couple_id: params.coupleId,
+      user_id: params.userId,
+      month: params.month,
+      ...params.values,
+      wish: params.wish.trim() || null,
+    }),
+  );
 }
 
 // ---- Weekritme ----

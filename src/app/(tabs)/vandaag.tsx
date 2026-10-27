@@ -9,7 +9,7 @@ import { SoloCard } from '@/components/SoloCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { dismissSoloCard, fetchAnswers, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
+import { dismissSoloCard, fetchAnswers, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
@@ -32,6 +32,7 @@ export default function Vandaag() {
   const [yearAgo, setYearAgo] = useState<YearAgoAnswer[]>([]);
   const [offers, setOffers] = useState<SeriesOffer[]>([]);
   const [solo, setSolo] = useState(false);
+  const [checkinOpen, setCheckinOpen] = useState(false);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -56,13 +57,16 @@ export default function Vandaag() {
       setYearAgo(q.repeat_of && q.answered ? await fetchYearAgo(q.day).catch(() => []) : []);
       setOffers(await fetchSeriesOffer().catch(() => []));
       setSolo(await fetchSoloCardDue().catch(() => false));
+      const month = await fetchCheckinOpenMonth().catch(() => null);
+      const filled = month ? (await fetchCheckins().catch(() => [])).some((c) => c.month === month && c.user_id === me?.id) : true;
+      setCheckinOpen(!!month && !filled);
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
       if (String((e as { message?: string })?.message).includes('geen_partner')) await refresh();
       else setError(friendlyError(e));
     }
-  }, [refresh]);
+  }, [refresh, me?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -133,6 +137,15 @@ export default function Vandaag() {
           />
         </View>
 
+        {checkinOpen && (
+          <Card>
+            <AppText variant="large">Hoe gaat het met ons?</AppText>
+            <AppText muted>De check-in van deze maand staat klaar. Het kost een paar minuten.</AppText>
+            <View style={{ alignSelf: 'flex-start' }}>
+              <Button kind="secondary" label="Naar de check-in" onPress={() => router.push('/checkin')} />
+            </View>
+          </Card>
+        )}
         {coupleId && (
           <YesterdayCard
             yesterday={yesterday}
