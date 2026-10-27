@@ -1,8 +1,8 @@
 -- Tests: uitgebreide content en de inclusiviteit-pas
 begin;
-select plan(7);
+select plan(8);
 
-select is((select count(*)::int from public.daily_questions where slug like 'dv-%'), 180, '180 dagvragen');
+select is((select count(*)::int from public.daily_questions where slug like 'dv-%'), 365, '365 dagvragen: elke dag van het jaar een andere');
 select is((select count(*)::int from public.daily_questions where position between 61 and 120), 60, 'dv-061 t/m dv-120 zijn toegevoegd');
 select is(
   (select array_agg(n order by depth) from (select depth, count(*)::int as n from public.daily_questions where position between 61 and 120 group by depth) d),
@@ -15,6 +15,10 @@ select is((select count(*)::int from public.exercises where steps::text ~* 'hem 
 select is((select options->>2 from public.quiz_questions where slug = 'qz-toekomst-02'), 'Iets voor thuis', 'quizoptie gaat niet uit van een gedeeld huis');
 select is((select text from public.theme_questions where slug = 'th-verlangen-03'), 'Welke plek, behalve het bed, vind je spannend om te vrijen?',
   'kaarttekst is bijgewerkt');
+
+select is(
+  (select array_agg(n order by depth) from (select depth, count(*)::int as n from public.daily_questions where slug like 'dv-%' group by depth) d),
+  array[164, 128, 73], 'alle 365: 164 luchtig (45%), 128 persoonlijk (35%), 73 diep (20%)');
 
 select * from finish();
 rollback;

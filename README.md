@@ -28,7 +28,7 @@ Alles is zelf geschreven, in het Nederlands.
 
 | Onderdeel | Aantal |
 |---|---|
-| Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
+| Dagelijkse vragen | 365 (45% luchtig, 35% persoonlijk, 20% diep): elke dag van het jaar een andere |
 | Themaweken | 6 series × 7 vragen, elk met intro en afsluitende oefening |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
 | Gesprekskaarten | 9 thema's × 15 kaarten (waaronder *Op afstand*) + 18+-set van 15 |
