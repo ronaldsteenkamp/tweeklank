@@ -20,11 +20,12 @@
     "expo-status-bar": "~58.0.3",
     "jest-expo": "~58.0.11",
     "react": "19.3.0",
-    "react-dom": "^19.3.0",
+    "react-dom": "19.3.0",
     "react-native": "0.88.0",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
-    "react-native-url-polyfill": "^4.0.0"
+    "react-native-url-polyfill": "^4.0.0",
+    "react-native-web": "~0.21.4"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -43,7 +44,8 @@
     "test": "jest",
     "test:db": "bash scripts/test-db.sh",
     "check:content": "node scripts/check-content.mjs",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:web": "bash scripts/build-web.sh"
   },
   "private": true,
   "jest": {

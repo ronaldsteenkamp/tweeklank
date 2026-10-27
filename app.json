@@ -24,7 +24,11 @@
       "package": "nl.tweeklank.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "Tweeklank",
+      "themeColor": "#A84B26",
+      "backgroundColor": "#FBF6F0"
     },
     "plugins": [
       "expo-router",
@@ -38,6 +42,9 @@
       "expo-font"
     ],
     "scheme": "tweeklank",
-    "backgroundColor": "#FBF6F0"
+    "backgroundColor": "#FBF6F0",
+    "experiments": {
+      "baseUrl": "/tweeklank/app"
+    }
   }
 }

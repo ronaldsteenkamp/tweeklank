@@ -90,6 +90,15 @@ Het project **tweeklank** draait al:
    3. Koppel de app aan een gratis Expo-account met `npx eas-cli init`. Dat is nodig voor de pushtokens.
 7. **Mailserver (optioneel).** Alleen nodig als je ook inloggen met e-mail wilt aanbieden. Stel er een in onder *Authentication → Emails → SMTP Settings*.
 
+## Testen in de browser (zonder installatie)
+
+Open op beide telefoons **https://ronaldsteenkamp.github.io/tweeklank/app/** en tik op **Beginnen**. Dit is dezelfde app als webversie, gekoppeld aan hetzelfde Supabase-project.
+
+- Alles werkt, behalve pushmeldingen. Die werken alleen in de echte app.
+- Het account staat in de browser. Gebruik dus op elke telefoon steeds dezelfde browser, en geen privévenster.
+- Tip: kies in de browser *Zet op beginscherm*. Dan opent hij als een app.
+- De webversie bijwerken na een wijziging: `npm run build:web`, en commit `docs/`.
+
 ## Lokaal testen met Expo Go
 
 ```bash
