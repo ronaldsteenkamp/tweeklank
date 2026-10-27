@@ -3,9 +3,11 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureNotificationHandler } from '@/lib/push';
 import { SessionProvider } from '@/lib/session';
+import { installWebAlert } from '@/lib/webAlert';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
 configureNotificationHandler();
+installWebAlert();
 
 function ThemedStack() {
   const { colors, scheme } = useTheme();
