@@ -30,9 +30,9 @@ Alles is zelf geschreven, in het Nederlands.
 | Dagelijkse vragen | 180 (45% luchtig, 35% persoonlijk, 20% diep) |
 | Themaweken | 6 series × 7 vragen, elk met intro en afsluitende oefening |
 | Quizzen "Hoe goed ken je me?" | 5 × 10 vragen |
-| Gesprekskaarten | 8 thema's × 15 kaarten + 18+-set van 15 |
+| Gesprekskaarten | 9 thema's × 15 kaarten (waaronder *Op afstand*) + 18+-set van 15 |
 | Oefeningen | 12, elk met een korte onderbouwing ("geïnspireerd op …") |
-| Date-ideeën | 42 |
+| Date-ideeën | 50 (waarvan 8 voor op afstand) |
 
 ## Techniek
 
@@ -166,6 +166,10 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - *E-mail koppelen* stuurt een bevestigingslink (`supabase.auth.updateUser`). Daarvoor is een eigen SMTP-server nodig, zie stap 7 van *Supabase opzetten*.
 - *Herstelcode maken* geeft een code van 16 tekens die lang geldig is en één keer werkt. Een overzetcode is maar 15 minuten geldig en dus niet om te bewaren. Je gebruikt de herstelcode op een nieuwe telefoon via *Ik heb een overzetcode*.
 - **Ik → Jullie gegevens downloaden** maakt een JSON-bestand of een leesbare HTML-pagina op het toestel en opent het deelmenu (in de browser: een download). Je partner staat er alleen in voor dagen waarop jullie allebei hebben geantwoord.
+
+**Op afstand testen.**
+- Bij **Kaarten** staat het thema *Op afstand* (15 kaarten, 5 per diepgang). Bij de date-ideeën filter je op *Op afstand*.
+- Voeg onder *Belangrijke datums* de soort *We zien elkaar weer* toe. Zolang die datum nog komt, staat bovenaan **Vandaag** bijvoorbeeld *"Nog 12 dagen tot jullie elkaar weer zien"*.
 
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.

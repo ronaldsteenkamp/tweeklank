@@ -10,12 +10,13 @@ import { SoloCard } from '@/components/SoloCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { dismissSoloCard, fetchAnswers, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer, updateProfile } from '@/lib/api';
+import { dismissSoloCard, fetchAnswers, fetchImportantDates, fetchCheckinOpenMonth, fetchCheckins, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer, updateProfile } from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
 import { pauseLabel, streakLabel, weekLabel, type WeekStatus } from '@/lib/rhythm';
 import { showRecoveryCard } from '@/lib/recovery';
+import { nextReunion, reunionLabel } from '@/lib/together';
 import { isSeriesFinale, seriesLabel, type SeriesOffer } from '@/lib/series';
 import { useSession } from '@/lib/session';
 import { isPhoneOnlyAccount } from '@/lib/transfer';
@@ -36,6 +37,7 @@ export default function Vandaag() {
   const [offers, setOffers] = useState<SeriesOffer[]>([]);
   const [solo, setSolo] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [reunion, setReunion] = useState<{ title: string; days: number } | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -60,6 +62,7 @@ export default function Vandaag() {
       setYearAgo(q.repeat_of && q.answered ? await fetchYearAgo(q.day).catch(() => []) : []);
       setOffers(await fetchSeriesOffer().catch(() => []));
       setSolo(await fetchSoloCardDue().catch(() => false));
+      setReunion(nextReunion(await fetchImportantDates().catch(() => []), q.day));
       const month = await fetchCheckinOpenMonth().catch(() => null);
       const filled = month ? (await fetchCheckins().catch(() => [])).some((c) => c.month === month && c.user_id === me?.id) : true;
       setCheckinOpen(!!month && !filled);
@@ -127,6 +130,16 @@ export default function Vandaag() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
+        {reunion && (
+          <Card tone="alt">
+            <AppText variant="large" color={colors.primary}>
+              {reunionLabel(reunion.days)}
+            </AppText>
+            <AppText variant="small" muted>
+              {reunion.title}
+            </AppText>
+          </Card>
+        )}
         <AppText variant="label" muted>
           {formatDayNl(today.day).toUpperCase()}
         </AppText>

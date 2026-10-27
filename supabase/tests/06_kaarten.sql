@@ -42,8 +42,8 @@ $$;
 
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 set local role authenticated;
-select is((select count(*) from public.themes where not is_explicit), 8::bigint, 'acht gewone thema''s zichtbaar');
-select is((select count(*) from public.theme_questions), 120::bigint, '120 gewone vragen zichtbaar');
+select is((select count(*) from public.themes where not is_explicit), 9::bigint, 'negen gewone thema''s zichtbaar');
+select is((select count(*) from public.theme_questions), 135::bigint, '135 gewone vragen zichtbaar');
 reset role;
 
 select results_eq($$ select * from pg_temp.visible('11111111-1111-1111-1111-111111111111') $$, $$ values (0::bigint, 0::bigint) $$,

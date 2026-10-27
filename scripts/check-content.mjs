@@ -11,7 +11,7 @@ const files = readdirSync(dir)
   .map((f) => readFileSync(join(dir, f), 'utf8'));
 const sql = files.join('\n');
 
-const slugs = [...sql.matchAll(/\(\s*'([a-z0-9-]+)'\s*,/g)].map((m) => m[1]);
+const slugs = [...sql.matchAll(/\(\s*'([a-z]{2}-[a-z0-9-]+)'\s*,/g)].map((m) => m[1]);
 const count = (prefix) => slugs.filter((s) => s.startsWith(prefix)).length;
 
 const quizSlugs = slugs.filter((s) => /^qz-[a-z]+$/.test(s));
@@ -21,7 +21,7 @@ const expectations = [
   ['dagelijkse vragen', count('dv-'), 60],
   ['quizzen', quizSlugs.length, 5],
   ['oefeningen', count('ex-'), 12],
-  ['date-ideeën', count('di-'), 40],
+  ['date-ideeën', count('di-'), 50],
   ...quizSlugs.map((q) => [`  vragen in ${q}`, quizQuestionsPer(q), 10]),
 ];
 
@@ -56,7 +56,7 @@ const cardRows = [...sql.matchAll(/\('(th-[a-z]+)-\d{2}', '(th-[a-z]+)', \d+, ([
 const regularThemes = themeRows.filter((m) => m[2] === 'false').map((m) => m[1]);
 const explicitThemes = themeRows.filter((m) => m[2] === 'true').map((m) => m[1]);
 const themeChecks = [
-  ["gewone thema's", regularThemes.length, 8],
+  ["gewone thema's", regularThemes.length, 9],
   ['18+-thema', explicitThemes.length, 1],
   ...[...regularThemes, ...explicitThemes].map((t) => [`  kaarten in ${t}`, cardRows.filter((m) => m[2] === t).length, 15]),
 ];
