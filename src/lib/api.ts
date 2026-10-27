@@ -127,6 +127,16 @@ export async function sendNudge(): Promise<void> {
   unwrap(await supabase.rpc('send_nudge'));
 }
 
+// ---- Solo-modus ----
+
+export async function fetchSoloCardDue(): Promise<boolean> {
+  return !!unwrap(await supabase.rpc('solo_card_due'));
+}
+
+export async function dismissSoloCard(): Promise<void> {
+  unwrap(await supabase.rpc('dismiss_solo_card'));
+}
+
 // ---- Weekritme ----
 
 export async function fetchWeek(): Promise<WeekStatus | null> {

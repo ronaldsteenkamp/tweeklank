@@ -5,10 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnswerThread } from '@/components/AnswerThread';
 import { NudgeButton } from '@/components/NudgeButton';
 import { SeriesOfferCard } from '@/components/SeriesOfferCard';
+import { SoloCard } from '@/components/SoloCard';
 import { YearAgo } from '@/components/YearAgo';
 import { YesterdayCard } from '@/components/YesterdayCard';
 import { AppText, Button, Card, DEPTH_LABEL, ErrorText, Field, Loading, Pill, Row } from '@/components/ui';
-import { fetchAnswers, fetchSeriesOffer, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
+import { dismissSoloCard, fetchAnswers, fetchSeriesOffer, fetchSoloCardDue, fetchToday, fetchWeek, fetchYearAgo, fetchYesterday, saveAnswer } from '@/lib/api';
 import { yesterdayView, type YesterdayQuestion } from '@/lib/catchup';
 import { formatDayNl } from '@/lib/dates';
 import { friendlyError } from '@/lib/errors';
@@ -30,6 +31,7 @@ export default function Vandaag() {
   const [yesterdayAnswers, setYesterdayAnswers] = useState<Answer[]>([]);
   const [yearAgo, setYearAgo] = useState<YearAgoAnswer[]>([]);
   const [offers, setOffers] = useState<SeriesOffer[]>([]);
+  const [solo, setSolo] = useState(false);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
@@ -53,6 +55,7 @@ export default function Vandaag() {
       setYesterdayAnswers(y && yesterdayView(y) === 'ingehaald' ? await fetchAnswers(y.day) : []);
       setYearAgo(q.repeat_of && q.answered ? await fetchYearAgo(q.day).catch(() => []) : []);
       setOffers(await fetchSeriesOffer().catch(() => []));
+      setSolo(await fetchSoloCardDue().catch(() => false));
       setError(null);
     } catch (e) {
       // Partner heeft ontkoppeld: sessie verversen, dan stuurt de tab-layout je terug naar koppelen.
@@ -199,6 +202,14 @@ export default function Vandaag() {
           </Card>
         )}
         {!showForm && <SeriesOfferCard offers={offers} partnerName={partnerName} onChanged={load} />}
+        {solo && (
+          <SoloCard
+            onDismiss={() => {
+              setSolo(false);
+              dismissSoloCard().catch(() => {});
+            }}
+          />
+        )}
         <NudgeButton partnerName={partnerName} />
         <ErrorText message={error} />
       </ScrollView>

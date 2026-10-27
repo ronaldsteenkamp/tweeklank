@@ -149,6 +149,11 @@ De app is al gekoppeld aan het Tweeklank-project, dus je hebt geen `.env` nodig.
 - *Nu niet* verbergt het aanbod twee weken, alleen voor jou.
 - Zonder 60 dagen te wachten: zie `supabase/tests/13_themaweken.sql`.
 
+**Solo-kaart testen.**
+- Heeft je partner drie dagen of langer geen dagvraag beantwoord, terwijl jij wel antwoordt, dan zie je alleen in de app een rustige kaart *Even alleen aan de beurt*. Er gaat geen pushmelding uit en je partner ziet niets.
+- De kaart noemt nooit een aantal dagen of datums. Hij bevat een korte uitleg over verschillende behoeften aan nabijheid, één gespreksopener voor buiten de app en onderaan de link naar de hulppagina.
+- *Wegklikken* verbergt hem; hij komt hoogstens één keer per 14 dagen terug. Zie `supabase/tests/15_solo.sql`.
+
 **Gisteren inhalen testen.**
 - Sla op een dag de vraag over. De volgende dag staat bovenaan **Vandaag** de kaart *Gisteren nog open*.
 - Tik op *Nu beantwoorden*. Het antwoord van je partner op gisteren zie je pas als je zelf hebt geantwoord, net als bij vandaag.
